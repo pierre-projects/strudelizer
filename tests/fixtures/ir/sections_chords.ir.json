@@ -1,0 +1,64 @@
+{
+  "version": "1",
+  "meta": {
+    "title": "Sections and Chords",
+    "bpm": 96,
+    "time_signature": [4, 4],
+    "key": "C",
+    "source": "sections_chords.ir.json"
+  },
+  "sections": [
+    { "name": "intro", "start_bar": 0, "length": 1 },
+    { "name": "verse", "start_bar": 1, "length": 2 },
+    { "name": "chorus", "start_bar": 3, "length": 2 },
+    { "name": "verse", "start_bar": 5, "length": 2 }
+  ],
+  "tracks": [
+    {
+      "id": "drums",
+      "role": "drums",
+      "events": [
+        { "type": "hit", "start": "0", "drum": "kick" },
+        { "type": "hit", "start": "4", "drum": "kick" },
+        { "type": "hit", "start": "6", "drum": "snare" },
+        { "type": "hit", "start": "8", "drum": "kick" },
+        { "type": "hit", "start": "10", "drum": "snare" },
+        { "type": "hit", "start": "12", "drum": "kick" },
+        { "type": "hit", "start": "14", "drum": "clap" },
+        { "type": "hit", "start": "16", "drum": "kick" },
+        { "type": "hit", "start": "18", "drum": "clap" },
+        { "type": "hit", "start": "20", "drum": "kick" },
+        { "type": "hit", "start": "22", "drum": "snare" },
+        { "type": "hit", "start": "24", "drum": "kick" },
+        { "type": "hit", "start": "26", "drum": "snare" }
+      ]
+    },
+    {
+      "id": "keys",
+      "role": "chords",
+      "events": [
+        { "type": "chord", "start": "0", "duration": "4", "symbol": "Cmaj7", "root": "C", "quality": "maj7" },
+        { "type": "chord", "start": "4", "duration": "2", "symbol": "Am7", "root": "A", "quality": "m7" },
+        { "type": "chord", "start": "6", "duration": "2", "symbol": "Dm7", "root": "D", "quality": "m7" },
+        { "type": "chord", "start": "8", "duration": "4", "symbol": "G7", "root": "G", "quality": "7" },
+        { "type": "chord", "start": "12", "duration": "4", "symbol": "F/A", "root": "F", "quality": "maj", "bass": "A", "pitches": [57, 60, 65] },
+        { "type": "chord", "start": "16", "duration": "4", "symbol": "Csus2", "root": "C", "quality": "sus2", "pitches": [60, 62, 67] },
+        { "type": "chord", "start": "20", "duration": "2", "symbol": "Am7", "root": "A", "quality": "m7" },
+        { "type": "chord", "start": "22", "duration": "2", "symbol": "Dm7", "root": "D", "quality": "m7" },
+        { "type": "chord", "start": "24", "duration": "4", "symbol": "G7", "root": "G", "quality": "7" }
+      ]
+    },
+    {
+      "id": "bass",
+      "role": "bass",
+      "events": [
+        { "type": "note", "start": "4", "duration": "4", "pitch": 45 },
+        { "type": "note", "start": "8", "duration": "4", "pitch": 43 },
+        { "type": "note", "start": "12", "duration": "4", "pitch": 41 },
+        { "type": "note", "start": "16", "duration": "4", "pitch": 48 },
+        { "type": "note", "start": "20", "duration": "4", "pitch": 45 },
+        { "type": "note", "start": "24", "duration": "4", "pitch": 43 }
+      ]
+    }
+  ]
+}

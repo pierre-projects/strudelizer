@@ -1,0 +1,37 @@
+# Techno: driving saw bass, bright leads, TR-909 kit with grit.
+name: techno
+description: Driving saw bass and a TR-909 kit with grit.
+
+drums:
+  bank: RolandTR909
+  unbanked: [cowbell, tambourine, shaker]  # not in the TR-909 bank
+  fx:
+    - shape: 0.3
+
+roles:
+  bass:
+    sound: sawtooth
+    fx:
+      - lpf: 400
+      - shape: 0.4
+  chords:
+    sound: sawtooth
+    fx:
+      - hpf: 300
+      - lpf: 1800
+      - gain: 0.4
+      - room: 0.3
+  melody:
+    sound: square
+    fx:
+      - hpf: 500
+      - delay: 0.375
+      - gain: 0.5
+  vocal:
+    sound: sawtooth
+    fx:
+      - lpf: 1200
+  other:
+    sound: square
+    fx:
+      - lpf: 1500

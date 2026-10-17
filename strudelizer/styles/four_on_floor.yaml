@@ -1,0 +1,29 @@
+# Arrange style: one character per step. x hit, X accent, g ghost, . rest.
+name: four_on_floor
+description: Kick on every beat, offbeat open hats and octave bass, chord stabs.
+
+velocity: {accent: 120, normal: 100, ghost: 64}
+
+bass:
+  rule: root_octave    # alternate the bass note and the same note an octave up
+  octave: 2
+
+meters:
+  "4/4":
+    steps: 16
+    drums:
+      kick:       "X . . . x . . . X . . . x . . ."
+      clap:       ". . . . x . . . . . . . x . . ."
+      closed_hat: "g g . g g g . g g g . g g g . g"
+      open_hat:   ". . x . . . x . . . x . . . x ."
+    bass:         ". . x . . . x . . . x . . . x ."
+    chords:       ". . . . x . . . . . . . x . . ."
+  "3/4":
+    steps: 12
+    drums:
+      kick:       "X . . . x . . . x . . ."
+      clap:       ". . . . x . . . . . . ."
+      closed_hat: "g g . g g g . g g g . g"
+      open_hat:   ". . x . . . x . . . x ."
+    bass:         ". . x . . . x . . . x ."
+    chords:       ". . . . x . . . x . . ."

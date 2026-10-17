@@ -1,0 +1,19 @@
+Night Train
+{pickup: 2}
+
+Intro: | N.C. | Cm | Cmin | C- |
+
+[Verse]
+|: Cm7 | F7 | Bbmaj7 | EbM7 :|
+| Ab^7 / / G7 | Cm6 | Ddim G+ | Cm |
+| Fm9 | Bb7 | EbΔ | |
+
+[Chorus]
+| Abadd9 | Bb6 | Gsus4 G | Cm | x2
+| Fm7 | Bb9 | Ebmaj7 | Abmaj7 |
+| Dm7b5 | Gaug | Cm/Bb | % |
+| Bbsus2 | Bø | B° | E+ |
+| Cm | Fxx7 | G7 |
+
+[Outro]
+| Cm . . Fm | Cm |

@@ -1,0 +1,253 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Pickup Percussion",
+    "bpm": 110,
+    "time_signature": [
+      4,
+      4
+    ],
+    "source": "pickup_percussion.mid",
+    "pickup_beats": "1"
+  },
+  "sections": [],
+  "tracks": [
+    {
+      "id": "lead",
+      "role": "melody",
+      "instrument": "gm:73",
+      "events": [
+        {
+          "type": "note",
+          "start": "0",
+          "duration": "1/2",
+          "pitch": 67,
+          "velocity": 90
+        },
+        {
+          "type": "note",
+          "start": "1/2",
+          "duration": "1/2",
+          "pitch": 69,
+          "velocity": 90
+        },
+        {
+          "type": "note",
+          "start": "1",
+          "duration": "1",
+          "pitch": 71,
+          "velocity": 96
+        },
+        {
+          "type": "note",
+          "start": "2",
+          "duration": "1",
+          "pitch": 72,
+          "velocity": 96
+        },
+        {
+          "type": "note",
+          "start": "3",
+          "duration": "2",
+          "pitch": 74,
+          "velocity": 96
+        },
+        {
+          "type": "note",
+          "start": "5",
+          "duration": "2",
+          "pitch": 76,
+          "velocity": 96
+        },
+        {
+          "type": "note",
+          "start": "7",
+          "duration": "2",
+          "pitch": 72,
+          "velocity": 96
+        }
+      ]
+    },
+    {
+      "id": "percussion",
+      "role": "drums",
+      "instrument": "gm:drums",
+      "events": [
+        {
+          "type": "hit",
+          "start": "1/2",
+          "drum": "snare",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "1",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "1",
+          "drum": "cowbell",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "1",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "3/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "2",
+          "drum": "tambourine",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "5/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "3",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "3",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "7/2",
+          "drum": "cowbell",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "7/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "4",
+          "drum": "tambourine",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "4",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "9/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "5",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "5",
+          "drum": "cowbell",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "5",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "11/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "6",
+          "drum": "tambourine",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "6",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "13/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "7",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "7",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "15/2",
+          "drum": "cowbell",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "15/2",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "8",
+          "drum": "tambourine",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "8",
+          "drum": "shaker",
+          "velocity": 80
+        },
+        {
+          "type": "hit",
+          "start": "17/2",
+          "drum": "shaker",
+          "velocity": 80
+        }
+      ]
+    }
+  ]
+}

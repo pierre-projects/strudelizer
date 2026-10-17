@@ -1,0 +1,27 @@
+# Arrange style: one character per step. x hit, X accent, g ghost, . rest.
+name: lofi
+description: Laid-back boom-bap drums, root-fifth bass, sustained chords.
+
+velocity: {accent: 105, normal: 88, ghost: 50}
+
+bass:
+  rule: root_fifth     # alternate the chord's bass note and its fifth
+  octave: 2            # bass notes from C2 to B2
+
+meters:
+  "4/4":
+    steps: 16
+    drums:
+      kick:       "x . . . . . . x . . x . . . . ."
+      snare:      ". . . . X . . . . . . . X . . g"
+      closed_hat: "x . g . x . g . x . g . x . g ."
+    bass:         "x . . . . . . x . . x . . . . ."
+    chords: null       # chords sustain as written
+  "3/4":
+    steps: 12
+    drums:
+      kick:       "x . . . . . . . . . x ."
+      snare:      ". . . . X . . . X . . ."
+      closed_hat: "x . g . x . g . x . g ."
+    bass:         "x . . . . . . . . . x ."
+    chords: null

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/strudelizer/strudelizer/schema/song-2.json",
+  "title": "Strudelizer Song IR",
+  "description": "Version 2 of the Song IR. Times are exact fractions in beats; one beat is the time signature's denominator unit. Time 0 is the start of the song (of the pickup, when there is one).",
+  "type": "object",
+  "required": ["tracks"],
+  "properties": {
+    "version": { "const": "2" },
+    "meta": { "$ref": "#/$defs/meta" },
+    "sections": { "type": "array", "items": { "$ref": "#/$defs/section" } },
+    "tracks": { "type": "array", "items": { "$ref": "#/$defs/track" } }
+  },
+  "patternProperties": { "^x-": {} },
+  "additionalProperties": false,
+  "$defs": {
+    "time": {
+      "description": "Non-negative exact fraction in beats, e.g. \"0\", \"3\", \"1/3\".",
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(/[1-9][0-9]*)?$"
+    },
+    "duration": {
+      "description": "Positive exact fraction in beats.",
+      "type": "string",
+      "pattern": "^[1-9][0-9]*(/[1-9][0-9]*)?$"
+    },
+    "pitch": { "type": "integer", "minimum": 0, "maximum": 127 },
+    "velocity": { "type": "integer", "minimum": 1, "maximum": 127 },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "bpm": {
+          "description": "Tempo in beats (denominator units) per minute.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "time_signature": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "integer", "minimum": 1 },
+            { "enum": [1, 2, 4, 8, 16, 32, 64] }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "key": { "type": "string" },
+        "source": { "type": "string" },
+        "pickup_beats": {
+          "description": "Length of a partial first bar (anacrusis) in beats; must be shorter than a bar. Bar 1 starts at this time.",
+          "$ref": "#/$defs/duration"
+        }
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": ["start_bar", "length"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+        "start_bar": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "track": {
+      "type": "object",
+      "required": ["events"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+        "role": { "enum": ["drums", "bass", "chords", "melody", "vocal", "other"] },
+        "instrument": { "type": "string" },
+        "bars": {
+          "description": "Written by dedupe_bars: entry i is the index of the first bar identical to bar i.",
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      },
+      "patternProperties": { "^x-": {} },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "enum": ["note", "hit", "chord"] } },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "note" } } }, "then": { "$ref": "#/$defs/note" } },
+        { "if": { "properties": { "type": { "const": "hit" } } }, "then": { "$ref": "#/$defs/hit" } },
+        { "if": { "properties": { "type": { "const": "chord" } } }, "then": { "$ref": "#/$defs/chord" } }
+      ]
+    },
+    "note": {
+      "type": "object",
+      "required": ["type", "start", "duration", "pitch"],
+      "properties": {
+        "type": { "const": "note" },
+        "start": { "$ref": "#/$defs/time" },
+        "duration": { "$ref": "#/$defs/duration" },
+        "pitch": { "$ref": "#/$defs/pitch" },
+        "velocity": { "$ref": "#/$defs/velocity" }
+      },
+      "additionalProperties": false
+    },
+    "hit": {
+      "type": "object",
+      "required": ["type", "start", "drum"],
+      "properties": {
+        "type": { "const": "hit" },
+        "start": { "$ref": "#/$defs/time" },
+        "drum": {
+          "enum": ["kick", "snare", "closed_hat", "open_hat", "clap", "rim",
+                   "tom_low", "tom_mid", "tom_high", "crash", "ride",
+                   "cowbell", "tambourine", "shaker"]
+        },
+        "velocity": { "$ref": "#/$defs/velocity" }
+      },
+      "additionalProperties": false
+    },
+    "chord": {
+      "type": "object",
+      "required": ["type", "start", "duration", "symbol"],
+      "properties": {
+        "type": { "const": "chord" },
+        "start": { "$ref": "#/$defs/time" },
+        "duration": { "$ref": "#/$defs/duration" },
+        "symbol": { "type": "string", "minLength": 1 },
+        "root": { "type": "string", "pattern": "^[A-G](#|b)?$" },
+        "quality": { "type": "string" },
+        "extensions": { "type": "array", "items": { "type": "string" } },
+        "bass": { "type": "string", "pattern": "^[A-G](#|b)?$" },
+        "pitches": { "type": "array", "items": { "$ref": "#/$defs/pitch" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Lofi: soft, filtered tones, lots of room, LinnDrum kit.
+name: lofi
+description: Warm, filtered and roomy with a LinnDrum kit.
+
+drums:
+  bank: LinnDrum
+  fx:
+    - lpf: 3000
+    - room: 0.3
+    - gain: 0.8
+
+roles:
+  bass:
+    sound: triangle
+    fx:
+      - lpf: 600
+      - gain: 0.9
+  chords:
+    sound: sine
+    fx:
+      - lpf: 1600
+      - room: 0.5
+      - gain: 0.5
+  melody:
+    sound: triangle
+    fx:
+      - lpf: 2000
+      - delay: 0.25
+      - room: 0.4
+      - gain: 0.6
+  vocal:
+    sound: sine
+    fx:
+      - room: 0.4
+  other:
+    sound: sine
+    fx:
+      - lpf: 1800

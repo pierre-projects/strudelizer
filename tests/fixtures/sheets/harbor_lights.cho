@@ -1,0 +1,33 @@
+{title: Harbor Lights}
+{subtitle: An original test song for Strudelizer (ChordPro format)}
+{key: G}
+{tempo: 92}
+{pickup: 2}
+# Every Decision 2 spelling appears below. Two lines must be reported as
+# unparsed: the one with [Q7] and the unknown {flourish} directive.
+
+{start_of_verse}
+[D]Out on the [G]water the [Gmaj7]evening comes [Em7]slow
+[Cadd9]Lanterns are [D]swinging, [G/B]two by [C]two
+{end_of_verse}
+
+{start_of_chorus}
+[Em]Harbor [Bm7]lights, [CM7]carry me [D7]home
+[G6]Over the [Em9]tide where the [Am7]old ships [D]roam
+{end_of_chorus}
+
+{start_of_verse: Verse 2}
+[Emin]Ropes on the [Am6]pier and the [Bdim]gulls in the [B7]air
+[E-]Salt on the [C^7]window, [CΔ]light in your [Asus2]hair
+[Dsus4]Bells from the [D°]church as the [F#m7b5]wind turns [B+]cold
+[Bø]Stories the [Baug]sailors have [Cm]told
+[D9]Lights [Q7]fading [G]out
+{end_of_verse}
+
+{chorus}
+
+{start_of_bridge}
+[Cm]Hold the [Gm]line, [Am]hold the [D]line
+{end_of_bridge}
+{flourish: big}
+[G]

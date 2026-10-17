@@ -1,0 +1,27 @@
+# Arrange style: one character per step. x hit, X accent, g ghost, . rest.
+name: rock
+description: Straight 8th hats, backbeat snare, driving root bass, chords on the beat.
+
+velocity: {accent: 118, normal: 100, ghost: 60}
+
+bass:
+  rule: root           # the chord's bass note (the slash note for slash chords)
+  octave: 2
+
+meters:
+  "4/4":
+    steps: 8
+    drums:
+      kick:       "x . . x x . . ."
+      snare:      ". . X . . . X ."
+      closed_hat: "x x x x x x x x"
+    bass:         "x x x x x x x x"
+    chords:       "x . x . x . x ."
+  "3/4":
+    steps: 6
+    drums:
+      kick:       "x . . . . ."
+      snare:      ". . X . X ."
+      closed_hat: "x x x x x x"
+    bass:         "x . x . x ."
+    chords:       "x . x . x ."

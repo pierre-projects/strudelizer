@@ -1,0 +1,328 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Drums 4/4",
+    "bpm": 120,
+    "time_signature": [
+      4,
+      4
+    ],
+    "source": "drums_44.mid"
+  },
+  "sections": [],
+  "tracks": [
+    {
+      "id": "drums",
+      "role": "drums",
+      "instrument": "gm:drums",
+      "events": [
+        {
+          "type": "hit",
+          "start": "0",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "0",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "0",
+          "drum": "crash",
+          "velocity": 120
+        },
+        {
+          "type": "hit",
+          "start": "1/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "1",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "1",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "3/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "2",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "2",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "5/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "3",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "3",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "7/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "4",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "4",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "9/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "5",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "5",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "11/2",
+          "drum": "kick",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "11/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "6",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "6",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "13/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "7",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "7",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "15/2",
+          "drum": "open_hat",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "8",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "8",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "17/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "9",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "9",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "19/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "10",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "10",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "21/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "11",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "11",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "23/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "12",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "12",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "25/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "13",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "13",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "27/2",
+          "drum": "kick",
+          "velocity": 90
+        },
+        {
+          "type": "hit",
+          "start": "27/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "14",
+          "drum": "kick",
+          "velocity": 110
+        },
+        {
+          "type": "hit",
+          "start": "14",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "29/2",
+          "drum": "closed_hat",
+          "velocity": 70
+        },
+        {
+          "type": "hit",
+          "start": "15",
+          "drum": "snare",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "15",
+          "drum": "closed_hat",
+          "velocity": 100
+        },
+        {
+          "type": "hit",
+          "start": "31/2",
+          "drum": "open_hat",
+          "velocity": 90
+        }
+      ]
+    }
+  ]
+}

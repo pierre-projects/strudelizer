@@ -1,0 +1,27 @@
+Paper Kites
+{time: 3/4}
+{pickup: 1}
+
+[Intro]
+E    Am    F    C    G
+
+[Verse]
+Am              Fmaj7
+Paper kites above the station
+C                 G/B
+strings are tangled in the trees
+Amin       Dm7       E7      A-
+every window holds a story
+F6         Dm6       Esus4   E
+written in the autumn breeze
+
+[Chorus]
+CM7        G6        A^7      DΔ
+Let them go, let them go
+Fadd9      Bbsus2    G9       C#dim
+over rooftops into blue
+Am   Hm7   C   G
+F#°        Bm7b5     Bø       Caug
+someday they will come back too
+C+         Cm        Cmin     C/E
+coming back to you

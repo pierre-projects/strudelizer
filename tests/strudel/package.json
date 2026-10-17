@@ -1,0 +1,16 @@
+{
+  "name": "strudelizer-strudel-check",
+  "private": true,
+  "description": "Evaluates generated Strudel code with the pinned Strudel runtime.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "check": "node validate.mjs"
+  },
+  "dependencies": {
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/tonal": "1.2.6",
+    "@strudel/transpiler": "1.2.6"
+  }
+}

@@ -1,0 +1,10 @@
+# Golden tests compare bytes, so text files are LF on every OS.
+* text=auto eol=lf
+
+# Binary fixtures
+*.mid binary
+*.midi binary
+*.gp3 binary
+*.gp4 binary
+*.gp5 binary
+*.mxl binary

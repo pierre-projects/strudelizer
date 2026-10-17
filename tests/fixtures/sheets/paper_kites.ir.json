@@ -1,0 +1,491 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Paper Kites",
+    "bpm": 84,
+    "time_signature": [
+      3,
+      4
+    ],
+    "source": "paper_kites.txt",
+    "pickup_beats": "1"
+  },
+  "sections": [
+    {
+      "name": "intro",
+      "start_bar": 0,
+      "length": 5
+    },
+    {
+      "name": "verse",
+      "start_bar": 5,
+      "length": 12
+    },
+    {
+      "name": "chorus",
+      "start_bar": 17,
+      "length": 16
+    }
+  ],
+  "tracks": [
+    {
+      "id": "chords",
+      "role": "chords",
+      "events": [
+        {
+          "type": "chord",
+          "start": "0",
+          "duration": "1",
+          "symbol": "E",
+          "root": "E",
+          "quality": "maj",
+          "pitches": [
+            52,
+            56,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "1",
+          "duration": "3",
+          "symbol": "Am",
+          "root": "A",
+          "quality": "m",
+          "pitches": [
+            57,
+            60,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "4",
+          "duration": "3",
+          "symbol": "F",
+          "root": "F",
+          "quality": "maj",
+          "pitches": [
+            53,
+            57,
+            60
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "7",
+          "duration": "3",
+          "symbol": "C",
+          "root": "C",
+          "quality": "maj",
+          "pitches": [
+            48,
+            52,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "10",
+          "duration": "3",
+          "symbol": "G",
+          "root": "G",
+          "quality": "maj",
+          "pitches": [
+            55,
+            59,
+            62
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "13",
+          "duration": "3",
+          "symbol": "Am",
+          "root": "A",
+          "quality": "m",
+          "pitches": [
+            57,
+            60,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "16",
+          "duration": "3",
+          "symbol": "Fmaj7",
+          "root": "F",
+          "quality": "maj7",
+          "pitches": [
+            53,
+            57,
+            60,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "19",
+          "duration": "3",
+          "symbol": "C",
+          "root": "C",
+          "quality": "maj",
+          "pitches": [
+            48,
+            52,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "22",
+          "duration": "3",
+          "symbol": "G/B",
+          "root": "G",
+          "quality": "maj",
+          "bass": "B",
+          "pitches": [
+            47,
+            55,
+            59,
+            62
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "25",
+          "duration": "3",
+          "symbol": "Amin",
+          "root": "A",
+          "quality": "m",
+          "pitches": [
+            57,
+            60,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "28",
+          "duration": "3",
+          "symbol": "Dm7",
+          "root": "D",
+          "quality": "m7",
+          "pitches": [
+            50,
+            53,
+            57,
+            60
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "31",
+          "duration": "3",
+          "symbol": "E7",
+          "root": "E",
+          "quality": "7",
+          "pitches": [
+            52,
+            56,
+            59,
+            62
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "34",
+          "duration": "3",
+          "symbol": "A-",
+          "root": "A",
+          "quality": "m",
+          "pitches": [
+            57,
+            60,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "37",
+          "duration": "3",
+          "symbol": "F6",
+          "root": "F",
+          "quality": "6",
+          "pitches": [
+            53,
+            57,
+            60,
+            62
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "40",
+          "duration": "3",
+          "symbol": "Dm6",
+          "root": "D",
+          "quality": "m6",
+          "pitches": [
+            50,
+            53,
+            57,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "43",
+          "duration": "3",
+          "symbol": "Esus4",
+          "root": "E",
+          "quality": "sus4",
+          "pitches": [
+            52,
+            57,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "46",
+          "duration": "3",
+          "symbol": "E",
+          "root": "E",
+          "quality": "maj",
+          "pitches": [
+            52,
+            56,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "49",
+          "duration": "3",
+          "symbol": "CM7",
+          "root": "C",
+          "quality": "maj7",
+          "pitches": [
+            48,
+            52,
+            55,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "52",
+          "duration": "3",
+          "symbol": "G6",
+          "root": "G",
+          "quality": "6",
+          "pitches": [
+            55,
+            59,
+            62,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "55",
+          "duration": "3",
+          "symbol": "A^7",
+          "root": "A",
+          "quality": "maj7",
+          "pitches": [
+            57,
+            61,
+            64,
+            68
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "58",
+          "duration": "3",
+          "symbol": "DΔ",
+          "root": "D",
+          "quality": "maj7",
+          "pitches": [
+            50,
+            54,
+            57,
+            61
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "61",
+          "duration": "3",
+          "symbol": "Fadd9",
+          "root": "F",
+          "quality": "maj",
+          "extensions": [
+            "add9"
+          ],
+          "pitches": [
+            53,
+            57,
+            60,
+            67
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "64",
+          "duration": "3",
+          "symbol": "Bbsus2",
+          "root": "Bb",
+          "quality": "sus2",
+          "pitches": [
+            58,
+            60,
+            65
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "67",
+          "duration": "3",
+          "symbol": "G9",
+          "root": "G",
+          "quality": "7",
+          "extensions": [
+            "9"
+          ],
+          "pitches": [
+            55,
+            59,
+            62,
+            65,
+            69
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "70",
+          "duration": "3",
+          "symbol": "C#dim",
+          "root": "C#",
+          "quality": "dim",
+          "pitches": [
+            49,
+            52,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "73",
+          "duration": "3",
+          "symbol": "F#°",
+          "root": "F#",
+          "quality": "dim",
+          "pitches": [
+            54,
+            57,
+            60
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "76",
+          "duration": "3",
+          "symbol": "Bm7b5",
+          "root": "B",
+          "quality": "m7b5",
+          "pitches": [
+            59,
+            62,
+            65,
+            69
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "79",
+          "duration": "3",
+          "symbol": "Bø",
+          "root": "B",
+          "quality": "m7b5",
+          "pitches": [
+            59,
+            62,
+            65,
+            69
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "82",
+          "duration": "3",
+          "symbol": "Caug",
+          "root": "C",
+          "quality": "aug",
+          "pitches": [
+            48,
+            52,
+            56
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "85",
+          "duration": "3",
+          "symbol": "C+",
+          "root": "C",
+          "quality": "aug",
+          "pitches": [
+            48,
+            52,
+            56
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "88",
+          "duration": "3",
+          "symbol": "Cm",
+          "root": "C",
+          "quality": "m",
+          "pitches": [
+            48,
+            51,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "91",
+          "duration": "3",
+          "symbol": "Cmin",
+          "root": "C",
+          "quality": "m",
+          "pitches": [
+            48,
+            51,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "94",
+          "duration": "3",
+          "symbol": "C/E",
+          "root": "C",
+          "quality": "maj",
+          "bass": "E",
+          "pitches": [
+            40,
+            48,
+            52,
+            55
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+# Strudelizer sound profile: maps IR roles and drum names to Strudel sounds.
+# fx entries are applied in order as Strudel methods, e.g. {lpf: 800} -> .lpf(800)
+name: default
+description: Neutral synths with a TR-909 kit.
+
+drums:
+  bank: RolandTR909
+  map:
+    kick: bd
+    snare: sd
+    closed_hat: hh
+    open_hat: oh
+    clap: cp
+    rim: rim
+    tom_low: lt
+    tom_mid: mt
+    tom_high: ht
+    crash: cr
+    ride: rd
+    cowbell: cb
+    tambourine: tb
+    shaker: sh
+  # The TR-909 bank has no cowbell, tambourine or shaker; play these from
+  # Strudel's default drum kit instead (no .bank()). Map a drum to null to drop it.
+  unbanked: [cowbell, tambourine, shaker]
+  fx: []
+
+roles:
+  bass:
+    sound: sawtooth
+    fx:
+      - lpf: 800
+  chords:
+    sound: triangle
+    fx:
+      - gain: 0.6
+      - room: 0.2
+  melody:
+    sound: square
+    fx:
+      - lpf: 2400
+      - gain: 0.7
+  vocal:
+    sound: sine
+  other:
+    sound: triangle
