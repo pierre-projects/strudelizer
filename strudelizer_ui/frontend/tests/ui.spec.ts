@@ -2,6 +2,7 @@
 // sounds, play it, save it. Nothing is stubbed; the server is a real
 // `strudelize ui` and the editor is the real Strudel REPL.
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
@@ -27,7 +28,7 @@ function editorCode(page: Page): Promise<string> {
 test('a MIDI file becomes code that plays, and saves in every format', async ({ page }) => {
   const problems = watchConsole(page);
   await page.goto('/');
-  await page.setInputFiles('input[type=file]', MIDI.pathname.replace(/^\//, ''));
+  await page.setInputFiles('input[type=file]', fileURLToPath(MIDI));
 
   await expect(page.locator('.cm-editor')).toBeVisible();
   // The editor element appears a moment before it holds the code.
@@ -90,11 +91,15 @@ test('the problems panel points at the line it could not read', async ({ page })
   const problem = page.locator('.problems li', { hasText: 'unparsed' });
   await expect(problem).toContainText("not chords: 'Fxx7'");
   await problem.getByRole('button', { name: 'line 16' }).click();
-  const selected = await page.evaluate(() => {
-    const box = document.querySelector('#paste') as HTMLTextAreaElement;
-    return box.value.slice(box.selectionStart, box.selectionEnd);
-  });
-  expect(selected).toBe('| Cm | Fxx7 | G7 |');
+  // The selection is set in an effect after the next render, so wait for it.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const box = document.querySelector('#paste') as HTMLTextAreaElement;
+        return box.value.slice(box.selectionStart, box.selectionEnd);
+      }),
+    )
+    .toBe('| Cm | Fxx7 | G7 |');
 });
 
 test('clicking a bar shows the code that bar came from', async ({ page }) => {
