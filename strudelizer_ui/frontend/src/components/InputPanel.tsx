@@ -57,7 +57,7 @@ export function InputPanel({ store }: { store: Store }) {
           }}
         >
           <strong>Drop a song here</strong>
-          <span class="muted small">{describe(accept)}</span>
+          <span class="muted small">{catalog ? describe(accept) : 'asking Strudelizer what it reads…'}</span>
           <button type="button" onClick={() => fileInput.current?.click()}>
             Choose a file
           </button>
