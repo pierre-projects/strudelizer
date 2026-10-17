@@ -69,9 +69,19 @@ def test_gp_generator_reproduces_checked_in_file():
 
 
 def test_mxl_generator_reproduces_checked_in_file():
+    """Same entries, same bytes inside. The zip itself is not compared byte
+    for byte: DEFLATE output depends on the zlib build (Linux and macOS
+    differ from Windows)."""
+    import io
+    import zipfile
+
     import make_mxl
 
-    assert make_mxl.TARGET.read_bytes() == make_mxl.build(), "score_compressed.mxl is stale; rerun make_mxl.py"
+    def entries(data):
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            return [(i.filename, i.compress_type, archive.read(i)) for i in archive.infolist()]
+
+    assert entries(make_mxl.TARGET.read_bytes()) == entries(make_mxl.build()),         "score_compressed.mxl is stale; rerun make_mxl.py"
 
 
 @pytest.mark.filterwarnings("ignore::strudelizer.StrudelizerWarning")

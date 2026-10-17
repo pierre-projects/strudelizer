@@ -64,3 +64,22 @@ def test_api_with_names_instances_and_tuples():
     path = FIXTURES / "melody_triplets.mid"
     assert a.run(path) == b.run(path)
     assert "(profile: lofi)" in a.run(path)
+
+
+def test_pass_spec_keeps_windows_drive_paths():
+    """A Windows path's drive colon is not an option separator (this broke
+    remap_drums on CI's D: drive, where a drive-relative path missed)."""
+    from strudelizer.pipeline import _split_args
+
+    assert _split_args(r"remap_drums:C:\kits\a.yaml") == ["remap_drums", r"C:\kits\a.yaml"]
+    assert _split_args("remap_drums:D:/kits/a.yaml") == ["remap_drums", "D:/kits/a.yaml"]
+    assert _split_args(r"remap_drums:map=C:\kits\a.yaml") == ["remap_drums", r"map=C:\kits\a.yaml"]
+    assert _split_args("quantize:16:grid=8t") == ["quantize", "16", "grid=8t"]
+    assert _split_args("arrange:style=/home/me/my.yaml") == ["arrange", "style=/home/me/my.yaml"]
+    specs = parse_pass_spec(r"remap_drums:C:\kits\a.yaml,quantize:16")
+    assert [(p.name, o) for p, o in specs] == [("remap_drums", {"map": r"C:\kits\a.yaml"}), ("quantize", {"grid": "16"})]
+
+
+def test_two_bare_arguments_are_an_error():
+    with pytest.raises(StrudelizerError, match="one bare argument"):
+        parse_pass_spec("quantize:16:8t")

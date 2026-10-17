@@ -111,16 +111,23 @@ def test(args: list[str]) -> int:
     return run([sys.executable, "-m", "pytest", *args], env=env)
 
 
-def strudel() -> int:
-    node = shutil.which("node")
+def strudel_deps() -> int:
+    """Install the pinned Strudel runtime (npm ci) if it is missing, so the
+    Strudel validity tests run instead of skipping."""
     npm = shutil.which("npm")
-    if node is None or npm is None:
+    if shutil.which("node") is None or npm is None:
         print("strudel: node and npm are required (https://nodejs.org)", file=sys.stderr)
         return 1
     if not (STRUDEL_DIR / "node_modules" / "@strudel" / "core").exists():
-        code = run([npm, "ci", "--no-audit", "--no-fund"], cwd=STRUDEL_DIR)
-        if code:
-            return code
+        return run([npm, "ci", "--no-audit", "--no-fund"], cwd=STRUDEL_DIR)
+    return 0
+
+
+def strudel() -> int:
+    code = strudel_deps()
+    if code:
+        return code
+    node = shutil.which("node")
     files = sorted(str(p) for p in (ROOT / "tests" / "fixtures").rglob("*.js"))
     print(f"$ node validate.mjs --cycles 64 <{len(files)} golden files>", flush=True)
     proc = subprocess.run(
@@ -193,7 +200,9 @@ def main(argv: list[str]) -> int:
         return 2
     if not extras_ok(allow_missing):
         return 1
-    steps = [("lint", lint), ("test", lambda: test(["-q"])), ("strudel", strudel), ("package", package)]
+    # the Strudel runtime goes in before the tests, or its validity tests skip
+    steps = [("lint", lint), ("strudel runtime", strudel_deps), ("test", lambda: test(["-q"])),
+             ("strudel", strudel), ("package", package)]
     if FRONTEND_DIR.exists():
         steps.append(("ui", ui))
     for name, step in steps:

@@ -11,6 +11,7 @@ Plugins get this without doing anything themselves.
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence, Union
 
@@ -45,14 +46,23 @@ def parse_pass_spec(spec: str | Iterable[PassSpec] | None) -> list[tuple[Pass, d
             plugin = registry.get_pass(name) if isinstance(name, str) else name
             out.append((plugin, dict(options)))
             continue
-        name, *args = [part.strip() for part in item.strip().split(":")]
+        name, *args = _split_args(item.strip())
         plugin = registry.get_pass(name)
         options: dict[str, Any] = {}
+        bare_seen = False
         for arg in args:
             if "=" in arg:
                 key, value = arg.split("=", 1)
                 options[key.strip()] = value.strip()
             elif plugin.default_option:
+                if bare_seen:
+                    raise StrudelizerError(
+                        f"pass:{name}",
+                        f"the {name} pass takes one bare argument, got another: '{arg}'",
+                        location=f"--passes {item}",
+                        fix=f"write further options as {name}:key=value",
+                    )
+                bare_seen = True
                 options[plugin.default_option] = arg
             else:
                 raise StrudelizerError(
@@ -63,6 +73,27 @@ def parse_pass_spec(spec: str | Iterable[PassSpec] | None) -> list[tuple[Pass, d
                 )
         out.append((plugin, options))
     return out
+
+
+def _split_args(text: str) -> list[str]:
+    """Split 'name:arg:key=value' on ':', except a Windows drive colon:
+    'remap_drums:C:\\kits\\a.yaml' -> ['remap_drums', 'C:\\kits\\a.yaml'].
+    A drive colon follows a single letter that starts an argument (or its
+    value, after '=') and comes before a slash or backslash."""
+    parts: list[str] = []
+    current = ""
+    for i, char in enumerate(text):
+        if char == ":":
+            after = text[i + 1:i + 2]
+            if after in ("\\", "/") and re.fullmatch(r"(?:[^=]*=)?\s*[A-Za-z]", current) and parts:
+                current += char
+                continue
+            parts.append(current.strip())
+            current = ""
+            continue
+        current += char
+    parts.append(current.strip())
+    return parts
 
 
 def _stage(plugin: Any, kind: str) -> str:
