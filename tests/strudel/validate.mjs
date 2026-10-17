@@ -84,5 +84,7 @@ for (const file of files) {
   results.push(result);
 }
 
-process.stdout.write(JSON.stringify(results, null, 1) + '\n');
-process.exit(failed ? 1 : 0);
+// Exit only once stdout has flushed: on Linux and macOS a pipe is
+// asynchronous, and exiting straight after write() cuts the output at the
+// 64 KB pipe buffer (Windows pipes are synchronous, so it never shows there).
+process.stdout.write(JSON.stringify(results, null, 1) + '\n', () => process.exit(failed ? 1 : 0));
