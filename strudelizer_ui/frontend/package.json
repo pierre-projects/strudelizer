@@ -1,0 +1,22 @@
+{
+  "name": "strudelizer-ui-frontend",
+  "private": true,
+  "type": "module",
+  "description": "Single-page frontend for `strudelize ui`; builds into ../static, which the FastAPI app serves.",
+  "scripts": {
+    "vendor": "node scripts/vendor-strudel.mjs",
+    "dev": "npm run vendor && vite",
+    "build": "npm run vendor && tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "preact": "^10.26.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@strudel/repl": "1.2.6",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.6"
+  }
+}

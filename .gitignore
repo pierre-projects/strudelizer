@@ -15,6 +15,12 @@ htmlcov/
 # Node (pinned Strudel runtime for tests; reinstall with npm ci)
 node_modules/
 
+# The UI's copy of the Strudel REPL bundle (npm run vendor rewrites it; the
+# built copy under strudelizer_ui/static/ is the one that ships)
+strudelizer_ui/frontend/public/strudel/
+strudelizer_ui/frontend/test-results/
+strudelizer_ui/frontend/playwright-report/
+
 # Editors and OS
 .vscode/
 .idea/
