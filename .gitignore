@@ -21,6 +21,9 @@ strudelizer_ui/frontend/public/strudel/
 strudelizer_ui/frontend/test-results/
 strudelizer_ui/frontend/playwright-report/
 
+# Screenshots of the UI, taken on demand rather than committed
+docs/ui/
+
 # Editors and OS
 .vscode/
 .idea/

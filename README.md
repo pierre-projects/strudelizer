@@ -29,6 +29,7 @@ git clone <this repo> strudelizer && cd strudelizer
 pip install -e .                    # MIDI, chord sheets, ASCII tabs
 pip install -e ".[guitarpro]"       # + Guitar Pro .gp3/.gp4/.gp5 (PyGuitarPro)
 pip install -e ".[musicxml]"        # + MusicXML .musicxml/.mxl (music21)
+pip install -e ".[ui]"              # + the local web UI (`strudelize ui`)
 pip install -e ".[all]"             # everything, plus the dev tools
 ```
 
@@ -88,6 +89,40 @@ and each track gets its sound from the profile. When a song has sections, as cho
 sheets usually do, each section becomes a `const` and the song ends with
 `arrange([8, verse], [8, chorus], ...)`.
 
+## The web UI
+
+Prefer clicking to typing? `strudelize ui` opens the same pipeline in a page, with
+Strudel's own editor embedded so you can hear a change as you make it.
+
+```sh
+pip install -e ".[ui]"
+strudelize ui                    # opens http://127.0.0.1:8765 in your browser
+strudelize ui --port 9000 --no-browser
+```
+
+Drop in a song (or paste a chord sheet) and you get:
+
+- **Song** - the file or pasted text, with the importer it detected and an override.
+- **Options** - every control is generated from the installed plugins, so a plugin you
+  install appears here with its own options. Labels are plain ("Tidy up the timing",
+  "Groove style"); the tooltip gives the flag or pass name. Changing anything converts
+  again straight away, without stopping the music.
+- **Code** - the real Strudel editor. **ctrl+enter** plays, **ctrl+.** stops,
+  **alt+r** converts again, and "Open in strudel.cc" hands the same code to the
+  website. You can type in it; "Reset to generated" puts Strudelizer's version back.
+- **Arrangement** - sections over a bar ruler, the chord in each bar, and a lane per
+  track. Mute or solo a track and the code is generated again without it. Clicking a
+  bar or a lane scrolls the code to the matching line.
+- **Problems** - the same warnings and errors the CLI prints. Click one and it shows
+  you the line of your sheet or the bar it is talking about.
+- **Save** - the code, a MIDI file or the IR. If you edited the code, that is what is
+  saved.
+
+It is all local: your files are read by the server on your machine and never sent
+anywhere. The only thing that needs the network is Strudel's sample loading, which is
+why a drum kit takes a moment the first time you press play. There is a dark theme and
+a light one, and the page works down to tablet width.
+
 ## Commands
 
 | Command | What it does |
@@ -97,6 +132,7 @@ sheets usually do, each section becomes a `const` and the song ends with
 | `strudelize pass <ir> --passes SPEC -o out.ir.json` | Run passes on an IR file |
 | `strudelize emit <ir> -o song.js [--profile P]` | IR to Strudel (or `.mid` / `--emitter ...`) |
 | `strudelize list` | Installed importers, passes, emitters, profiles and styles |
+| `strudelize ui` | Open the local web UI (needs the `[ui]` extra) |
 
 Options for the one-shot form (`import` takes the importer ones too):
 
@@ -400,7 +436,20 @@ pip install -e ".[all]"           # dev tools plus the guitarpro and musicxml ex
 python scripts/check.py           # lint + tests (strict) + Strudel check; installs the
                                   # pinned Strudel runtime with npm ci on first run
 python scripts/check.py test -k chordsheet    # or: lint | test [pytest args] | strudel
+python scripts/check.py ui        # build the web UI and run its browser tests
 python tests/bench_dense.py       # NFR-6 timing on a dense 5-minute song
+```
+
+The UI's frontend lives in `strudelizer_ui/frontend/` (Vite, TypeScript, Preact) and
+builds into `strudelizer_ui/static/`, which is committed so that installing the package
+needs no Node:
+
+```sh
+cd strudelizer_ui/frontend
+npm install
+npm run dev                       # Vite on :5173, proxying /api to a running `strudelize ui`
+npm run build                     # vendor Strudel, typecheck, write ../static
+npm test                          # Playwright, against a server it starts itself
 ```
 
 `make check`, `make test` and the other Makefile targets just call `scripts/check.py`.
@@ -415,7 +464,10 @@ The test suite covers:
 - the release gates: every generated `.js` is evaluated with `@strudel/*` 1.2.6 in
   Node, queried for the whole song, and compared event by event with the IR.
 - the plugin gate: a third-party plugin package (the example above) is built as a
-  wheel, pip-installed into a fresh virtual environment and run.
+  wheel, pip-installed into a fresh virtual environment and run;
+- the web UI: every endpoint in `tests/test_ui_api.py`, and the page itself driven in
+  Chromium by `strudelizer_ui/frontend/tests/ui.spec.ts` (these need Node and, because
+  Strudel loads samples from the web, a network connection).
 
 `python scripts/check.py package` builds the sdist and wheel with `python -m build`
 and checks that the wheel holds the licence, metadata and data files. CI

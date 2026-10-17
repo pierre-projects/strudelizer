@@ -36,7 +36,7 @@ try {
   const patched = parts.length - 1;
   console.log(`vendored @strudel/repl@${version} into public/strudel (sample host patched x${patched})`);
 } catch (error) {
-  console.error('could not vendor @strudel/repl: run `npm install` first');
-  console.error(error.message);
+  console.error(`could not vendor @strudel/repl: ${error.message}`);
+  if (error.code === 'ENOENT') console.error('run `npm install` first');
   process.exitCode = 1;
 }

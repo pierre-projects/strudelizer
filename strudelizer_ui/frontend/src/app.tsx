@@ -1,3 +1,4 @@
+import { useEffect } from 'preact/hooks';
 import { CodePanel } from './components/CodePanel';
 import { ExportPanel } from './components/ExportPanel';
 import { InputPanel } from './components/InputPanel';
@@ -5,10 +6,25 @@ import { OptionsPanel } from './components/OptionsPanel';
 import { ProblemsPanel } from './components/ProblemsPanel';
 import { SongView } from './components/SongView';
 import { useStrudelizer } from './state';
+import { useTheme } from './theme';
 
 export function App() {
   const store = useStrudelizer();
-  const { catalog, song } = store;
+  const { catalog, song, reconvert } = store;
+  const [theme, toggleTheme] = useTheme();
+
+  // alt+r: convert again, for when a pass is not deterministic or a plugin
+  // changed under the running server.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.altKey && event.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        reconvert();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [reconvert]);
 
   return (
     <div class="app">
@@ -16,7 +32,18 @@ export function App() {
         <h1>Strudelizer</h1>
         <span class="subtitle">{song?.meta.title ?? 'Turn a song into Strudel'}</span>
         <div class="spacer" />
-        <span class="badge">{catalog ? `v${catalog.version}` : 'connecting'}</span>
+        <button
+          type="button"
+          class="tiny"
+          aria-pressed={theme === 'light'}
+          title="Switch between the dark and light theme"
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? 'Light' : 'Dark'} theme
+        </button>
+        <span class="badge" title="The Strudelizer this page is talking to">
+          {catalog ? `v${catalog.version}` : 'connecting'}
+        </span>
       </header>
 
       <div class="layout">
@@ -26,7 +53,7 @@ export function App() {
         </div>
 
         <div class="column">
-          <CodePanel store={store} />
+          <CodePanel store={store} theme={theme} />
           <SongView store={store} />
           <ProblemsPanel store={store} />
           <ExportPanel store={store} />

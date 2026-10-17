@@ -2,11 +2,11 @@
 // back. Everything the page generates goes through `pushCode`, so changing an
 // option while it plays swaps the pattern without stopping the music.
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { createEditor, pushCode, revealLine, shareUrl } from '../strudel';
+import { createEditor, pushCode, revealLine, setTheme, shareUrl } from '../strudel';
 import type { StrudelEditorElement, StrudelState } from '../strudel';
 import type { Store } from '../state';
 
-export function CodePanel({ store }: { store: Store }) {
+export function CodePanel({ store, theme }: { store: Store; theme: string }) {
   const { code, effectiveCode, dirty, setEditedCode, busy, error, revealed } = store;
   const host = useRef<HTMLDivElement>(null);
   const element = useRef<StrudelEditorElement | null>(null);
@@ -74,6 +74,12 @@ export function CodePanel({ store }: { store: Store }) {
     if (editor && revealed) revealLine(editor, revealed.line);
   }, [revealed]);
 
+  // The editor brings its own themes; use the one that matches the page.
+  useEffect(() => {
+    const editor = element.current?.editor;
+    if (editor && ready) setTheme(editor, theme);
+  }, [theme, ready]);
+
   function play() {
     const editor = element.current?.editor;
     if (editor) void editor.evaluate();
@@ -82,6 +88,23 @@ export function CodePanel({ store }: { store: Store }) {
   function stop() {
     element.current?.editor?.stop();
   }
+
+  // Strudel's own keys, from anywhere on the page. Inside the editor they are
+  // already bound, so there they are left alone.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || host.current?.contains(event.target as Node)) return;
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        play();
+      } else if (event.key === '.') {
+        event.preventDefault();
+        stop();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [ready]);
 
   function reset() {
     const editor = element.current?.editor;

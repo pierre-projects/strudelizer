@@ -28,9 +28,9 @@ export function SongView({ store }: { store: Store }) {
   if (!bars) return null;
 
   return (
-    <section class="panel" aria-labelledby="song-heading">
+    <section class="panel" aria-labelledby="arrangement-heading">
       <header>
-        <h2 id="song-heading">Song</h2>
+        <h2 id="arrangement-heading">Arrangement</h2>
         <span class="small muted">
           {bars} bars · {song.meta.bpm ?? '?'} BPM · {(song.meta.time_signature ?? [4, 4]).join('/')}
           {song.meta.key ? ` · ${song.meta.key}` : ''}

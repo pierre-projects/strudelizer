@@ -691,3 +691,119 @@ worth a second look.
       is a legal question.
 
     This belongs to the UI work, so I have not changed it.
+
+# UI decisions (the local web app)
+
+79. **Shape: a separate top-level package, `strudelizer_ui`, behind the `[ui]`
+    extra.** FastAPI, uvicorn and python-multipart are listed only there, so a
+    core install is unchanged. The package's `__init__` imports nothing from
+    FastAPI, so `strudelize ui` can tell "the extra is not installed" from "the
+    UI is broken". The frontend is built into `strudelizer_ui/static/`, which the
+    app serves; `pyproject.toml` ships it as package data.
+80. **The only change to `strudelizer/` is twelve lines of CLI.** `ui` joins
+    `COMMANDS`, gets a subparser (`--host`, `--port`, `--no-browser`) and a
+    handler that imports `strudelizer_ui.server` lazily and turns `ImportError`
+    into the usual `StrudelizerError` with `pip install -e ".[ui]"` as the fix.
+    Nothing else in the core knows the UI exists. (Asked and agreed before
+    building; the alternative was a second console script, which would have left
+    `strudelize ui` saying "unknown command".)
+81. **Option metadata lives in the UI, not in the registry.** A plugin just reads
+    the keys it cares about out of `options`, so there is nothing to draw a
+    control from. `strudelizer_ui/options.py` describes each shipped option as
+    `{name, label, type, default, help, group, choices|choices_from, ...}`, with
+    three levels of knowledge, most specific first:
+    1. a plugin's own `options` attribute (any plugin can opt in),
+    2. this table, for what ships with Strudelizer,
+    3. neither: `/api/plugins` marks the plugin `custom` and the panel offers a
+       `key=value` box, so a newly installed plugin still works.
+
+    `label` is the musician's word and `help` carries the technical spelling
+    (`--bpm`, `quantize:16+8t`), which the UI shows as the tooltip. The same
+    table names the plugins themselves ("Tidy up the timing" for `quantize`), so
+    **the frontend contains no list of plugin names at all**. An option with no
+    description is not the same as a plugin with no options: `[]` means "none",
+    `null` means "unknown".
+82. **Everything the UI knows comes from `/api/plugins`**, including the default
+    pass list (`parse_pass_spec(DEFAULT_PASSES)`) and the default emitter (read
+    off `Pipeline`'s signature), so the page starts where `strudelize` starts and
+    follows it if that changes.
+83. **The IR travels to the browser and back.** `/api/import` returns it,
+    `/api/convert` and `/api/export` take it, and it is schema-validated every
+    time it comes back in (stage `import:ir`), exactly as the CLI validates a
+    `.ir.json`. The browser is therefore just another pipeline caller, and the
+    song view reads the real IR rather than a summary invented for it.
+84. **Conversions are serialised on one thread.** `warnings.catch_warnings` swaps
+    a process-global filter list, so two conversions in parallel would steal each
+    other's warnings. Every endpoint is `async def`, which keeps it on the event
+    loop thread; a thread pool would need a lock instead. Each response carries
+    the warnings that its own stage produced.
+85. **Problems are the CLI's words.** `report.py` renders
+    `error [stage] at <location>: <message>` plus `fix:` verbatim, and also sends
+    the parts separately. It pulls a `line N` or `bar N` out of the message with
+    a regex, which is what makes a problem clickable: a line selects itself in
+    the paste box, a bar scrolls the code to itself.
+86. **An upload is written into a temporary directory under the user's own file
+    name**, so `meta.source` and the error locations read `night_train.txt`, like
+    the CLI. The temp path is stripped out of any error that mentions it. Files
+    never leave the machine, and nothing is kept after the request.
+87. **Frontend: Vite + TypeScript + Preact, about 40 kB.** No router (one page),
+    no component library, one store in `state.ts`, plain CSS with custom
+    properties for the two themes. Imports are debounced 400 ms and conversions
+    250 ms, each with an `AbortController` and a sequence guard, so dragging a
+    number box does not queue up requests. An importer option re-imports;
+    anything else only re-converts.
+88. **Playback is the real Strudel REPL, vendored.** `@strudel/repl` 1.2.6 is
+    pinned to the Strudel the repo's golden-file tests evaluate against, copied
+    into the app's own origin by `scripts/vendor-strudel.mjs` (it resolves its
+    clock worker against `document.currentScript`, so it cannot be bundled). The
+    page talks to the `<strudel-editor>` component's `editor` (a StrudelMirror):
+    `setCode` then `evaluate` only if it is already playing, so changing an
+    option while the music runs swaps the pattern without stopping it. The
+    editor's own theme follows the page's.
+89. **Upstream bug, patched in the vendor step.** 1.2.6's prebake fetches its
+    sample indexes from `raw.githubusercontent.com/felixroos/dough-samples/main/`,
+    where `uzu-drumkit.json` no longer exists; one 404 rejects the whole
+    `Promise.all`, `evaluate()` throws and *nothing* plays. The vendor script
+    rewrites that host to `https://strudel.b-cdn.net/` (the host Strudel itself
+    now uses; same files, each carrying its own `_base`) and fails loudly if a
+    future version no longer contains the string, so the patch cannot rot
+    silently. Verified in Chromium: before, `started: false` and console errors;
+    after, it plays with a clean console.
+90. **"Open in strudel.cc" uses the share format from `code2hash` in
+    `@strudel/core`**: the UTF-8 bytes in base64, URL-encoded, after the `#`.
+91. **Mute and solo regenerate the code without those tracks**, through a
+    `tracks` filter on `/api/convert`, rather than editing what the user sees.
+    The filter runs after the passes, so it names the tracks the emitter sees -
+    including the drums and bass that `arrange` just added.
+92. **The song view numbers bars the way Strudelizer's messages number them**:
+    with a pickup, cycle 0 is "the pickup bar" and bar 1 is cycle 1; without one,
+    cycle 0 is bar 1. "bar 7" in a warning and bar 7 on the ruler are the same
+    bar.
+93. **Clicking a bar finds the code by section.** It looks up the section the bar
+    is in and finds `const <section> =`, then narrows to the line inside a
+    multi-line `<...>` pattern. A song with no sections (most MIDI) has nothing to
+    point at, so clicking a bar does nothing; clicking a track lane still finds
+    that track's pattern. This reads the emitted text rather than reimplementing
+    the emitter's layout, so it degrades to "no highlight" instead of lying.
+94. **Tests.** `tests/test_ui_api.py` (34 tests) covers every endpoint against the
+    existing fixtures, including the error cases, and checks that an export of
+    the converted IR is byte-identical to the golden `night_train.rock.js`.
+    `strudelizer_ui/frontend/tests/ui.spec.ts` (6 tests) drives the built page in
+    Chromium against a real server: a MIDI file plays and saves in all three
+    formats, a pasted sheet re-converts when an option changes, a problem points
+    at its source line, a bar points at its code, an unreadable file reports like
+    the CLI, and the page works at tablet width. Console errors fail the test.
+    `python scripts/check.py ui` builds the frontend and runs them.
+
+    **review**: those browser tests need the network, because Strudel fetches its
+    samples. They are part of the full `check.py` run, so a fully offline machine
+    will see them fail.
+95. **review: hand edits are overwritten when an option changes.** The editor is
+    the user's to type in, and "Reset to generated" puts the generated code back,
+    but the next automatic conversion also replaces it, with only the "edited"
+    badge as a warning beforehand. Alternatives are to stop auto-converting once
+    the code is dirty, or to ask. Saving always matches what is in the editor.
+96. **Known gaps, deliberately.** The page converts one song at a time and keeps
+    nothing between visits except the theme. There is no undo beyond the
+    editor's own. Two browser tabs on the same server are not isolated from each
+    other, which is as safe as it needs to be for localhost.

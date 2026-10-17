@@ -12,6 +12,8 @@ interface StrudelMirror {
   evaluate(): void | Promise<void>;
   start(): void | Promise<void>;
   stop(): void;
+  /** One of @strudel/codemirror's theme names. */
+  setTheme(name: string): void;
   /** The CodeMirror view, used to reveal the line a bar maps to. */
   editor?: {
     state: { doc: { lines: number; line(n: number): { from: number; to: number } } };
@@ -75,6 +77,13 @@ export function isPlaying(editor: StrudelMirror | undefined): boolean {
 export function pushCode(editor: StrudelMirror, code: string): void {
   editor.setCode(code);
   if (isPlaying(editor)) void editor.evaluate();
+}
+
+/** Strudel's own themes, so the editor follows the page's light or dark. */
+const THEMES: Record<string, string> = { dark: 'strudelTheme', light: 'githubLight' };
+
+export function setTheme(editor: StrudelMirror, theme: string): void {
+  editor.setTheme?.(THEMES[theme] ?? THEMES.dark);
 }
 
 /** Select a line and scroll to it, without stealing focus from the page. */

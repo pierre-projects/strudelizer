@@ -5,10 +5,13 @@
     python scripts/check.py test [pytest args...]
     python scripts/check.py strudel    # evaluate every golden .js in Strudel
     python scripts/check.py package    # build sdist + wheel and check what is inside
+    python scripts/check.py ui         # build the web UI and run its browser tests
     python scripts/check.py --allow-missing-extras
 
 The full run insists on the optional extras (PyGuitarPro, music21) so their
 tests run instead of skipping; install them with `pip install -e ".[all]"`.
+The `ui` task additionally needs node, npm and a network connection, because
+Strudel loads its samples from the web.
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 STRUDEL_DIR = ROOT / "tests" / "strudel"
+FRONTEND_DIR = ROOT / "strudelizer_ui" / "frontend"
 EXTRAS = {"guitarpro": "guitarpro", "musicxml": "music21"}
 
 
@@ -137,6 +141,26 @@ def strudel() -> int:
     return 1 if failed else 0
 
 
+def ui() -> int:
+    """Build the web UI from source and drive it in a real browser."""
+    if importlib.util.find_spec("fastapi") is None:
+        print('ui: the web UI is not installed; pip install -e ".[ui]"', file=sys.stderr)
+        return 1
+    npm = shutil.which("npm") or shutil.which("npm.cmd")
+    if npm is None:
+        print("ui: npm is required to build the frontend (https://nodejs.org)", file=sys.stderr)
+        return 1
+    if not (FRONTEND_DIR / "node_modules").exists():
+        code = run([npm, "ci", "--no-audit", "--no-fund"], cwd=FRONTEND_DIR)
+        if code:
+            return code
+    for args in (["run", "build"], ["test"]):
+        code = run([npm, *args], cwd=FRONTEND_DIR)
+        if code:
+            return code
+    return 0
+
+
 def extras_ok(allow_missing: bool) -> bool:
     missing = [extra for extra, module in EXTRAS.items() if importlib.util.find_spec(module) is None]
     if not missing:
@@ -162,12 +186,17 @@ def main(argv: list[str]) -> int:
         return strudel()
     if task == "package":
         return package()
+    if task == "ui":
+        return ui()
     if task != "all":
         print(__doc__, file=sys.stderr)
         return 2
     if not extras_ok(allow_missing):
         return 1
-    for name, step in (("lint", lint), ("test", lambda: test(["-q"])), ("strudel", strudel), ("package", package)):
+    steps = [("lint", lint), ("test", lambda: test(["-q"])), ("strudel", strudel), ("package", package)]
+    if FRONTEND_DIR.exists():
+        steps.append(("ui", ui))
+    for name, step in steps:
         code = step()
         if code:
             print(f"check: {name} failed", file=sys.stderr)
