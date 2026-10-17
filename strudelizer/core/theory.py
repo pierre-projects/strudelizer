@@ -278,3 +278,18 @@ def is_no_chord(token: str) -> bool:
 
 def transpose_note(note: str, semitones: int, flats: bool) -> str:
     return spell(pitch_class(note) + semitones, flats)
+
+
+def transpose_symbol(symbol: str, semitones: int, flats: bool | None = None) -> str | None:
+    """'Bb6/9/D' up 2 -> 'C6/9/E'. The spelling after the root is kept.
+    `flats=None` keeps each note's own accidental style. None if `symbol`
+    is not a chord."""
+    parts = split_symbol(symbol)
+    if parts is None or parse_chord(symbol) is None:
+        return None
+    root, suffix, bass = (_norm_note(p) if p else p for p in parts)
+
+    def move(note: str) -> str:
+        return transpose_note(note, semitones, flats if flats is not None else "b" in note)
+
+    return move(root) + suffix + (f"/{move(bass)}" if bass else "")

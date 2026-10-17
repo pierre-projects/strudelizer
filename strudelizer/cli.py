@@ -42,6 +42,10 @@ def _add_import_options(p: argparse.ArgumentParser) -> None:
     p.add_argument("--bpm", type=float, help="tempo for inputs without one, e.g. chord sheets (default 100)")
     p.add_argument("--beats-per-chord", help="chord sheets: beats each chord lasts (default: one bar)")
     p.add_argument("--pickup", help="beats in a partial first bar (overrides what the importer detects)")
+    p.add_argument("--tuning", help='tabs: open strings, lowest first, e.g. "D A D G B E" or "drop d"')
+    p.add_argument("--capo", help="tabs and chord sheets: capo fret (pitches sound this many semitones higher)")
+    p.add_argument("--tab-rhythm", choices=("even8", "even16", "columns"),
+                   help="tabs: each note column is an 8th (default) or 16th, or use column spacing in each bar")
 
 
 def _add_strict(p: argparse.ArgumentParser) -> None:
@@ -121,6 +125,9 @@ def _importer_options(args: argparse.Namespace) -> dict[str, Any]:
         options["beats_per_chord"] = args.beats_per_chord
     if args.pickup is not None:
         options["pickup"] = args.pickup
+    for name in ("tuning", "capo", "tab_rhythm"):
+        if getattr(args, name, None) is not None:
+            options[name] = getattr(args, name)
     return options
 
 
@@ -147,15 +154,18 @@ def _list() -> str:
         title = {"pass": "passes"}.get(kind, f"{kind}s")
         lines.append(f"{title}:")
         plugins = registry.available(kind)
-        if not plugins:
+        missing = registry.unavailable(kind)
+        if not plugins and not missing:
             lines.append("  (none)")
-        width = max((len(p.name) for p in plugins), default=0)
+        width = max((len(p.name) for p in plugins + missing), default=0)
         for info in plugins:
             try:
                 summary = _summary(info.load())
             except StrudelizerError as exc:
                 summary = f"BROKEN: {exc.message}"
             lines.append(f"  {info.name.ljust(width)}  {summary}  [{info.distribution}]")
+        for info in missing:
+            lines.append(f"  {info.name.ljust(width)}  (not installed; {info.install_hint})")
     return "\n".join(lines) + "\n"
 
 

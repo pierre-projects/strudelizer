@@ -16,6 +16,7 @@ from fractions import Fraction
 from typing import Any, Mapping
 
 from ..core.errors import warn
+from ..core.gm import GM_KEYS
 from ..core.ir import Hit, Note, Song
 from ..core.theory import chord_pitches
 from ..core.time import DEFAULT_BPM, time_signature
@@ -26,12 +27,6 @@ TPQ = 480
 DRUM_CHANNEL = 9
 HIT_TICKS = TPQ // 8  # drum hits sound for a 32nd note
 
-# IR drum -> General MIDI key; the MIDI importer maps each back to the same name.
-GM_KEYS = {
-    "kick": 36, "snare": 38, "closed_hat": 42, "open_hat": 46, "clap": 39, "rim": 37,
-    "tom_low": 43, "tom_mid": 47, "tom_high": 50, "crash": 49, "ride": 51,
-    "cowbell": 56, "tambourine": 54, "shaker": 70,
-}
 ROLE_PROGRAMS = {"bass": 33, "chords": 0, "melody": 73, "vocal": 52, "other": 0, "drums": 0}
 MELODIC_CHANNELS = [c for c in range(16) if c != DRUM_CHANNEL]
 

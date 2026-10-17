@@ -24,7 +24,7 @@ const verse = stack(
     [Cm7 Cm7@2 Cm7] [F7 F7@2 F7] [Bb^7 Bb^7@2 Bb^7] [Eb^7 Eb^7@2 Eb^7]
     [Cm7 Cm7@2 Cm7] [F7 F7@2 F7] [Bb^7 Bb^7@2 Bb^7] [Eb^7 Eb^7@2 Eb^7]
     [Ab^7 Ab^7@2 G7] [Cm6 Cm6@2 Cm6] [Do Do Gaug Gaug] [Cm Cm@2 Cm]
-    [Fm9 Fm9@2 Fm9] [Bb7 Bb7@2 Bb7] [Eb^7 Eb^7@2 Eb^7]!2
+    [Fm9 Fm9@2 Fm9] [Bb7 Bb7@2 Bb7] [Eb^7 Eb^7@2 Eb^7@2 Eb^7@2 Eb^7]@2
   >`).voicing().s("triangle").gain(0.6).room(0.2),
   // drums (drums)
   stack(
@@ -38,7 +38,7 @@ const verse = stack(
     [c2 c3@2 c2@2 c3@2 c2] [f2 f3@2 f2@2 f3@2 f2] [a#2 a#3@2 a#2@2 a#3@2 a#2] [d#2 d#3@2 d#2@2 d#3@2 d#2]
     [c2 c3@2 c2@2 c3@2 c2] [f2 f3@2 f2@2 f3@2 f2] [a#2 a#3@2 a#2@2 a#3@2 a#2] [d#2 d#3@2 d#2@2 d#3@2 d#2]
     [g#2 g#3@2 g#2@2 g#3 g2 g3] [c2 c3@2 c2@2 c3@2 c2] [d2 d3@2 d2 g2 g3@2 g2] [c2 c3@2 c2@2 c3@2 c2]
-    [f2 f3@2 f2@2 f3@2 f2] [a#2 a#3@2 a#2@2 a#3@2 a#2] [d#2 d#3@2 d#2@2 d#3@2 d#2]!2
+    [f2 f3@2 f2@2 f3@2 f2] [a#2 a#3@2 a#2@2 a#3@2 a#2] [d#2 d#3@2 d#2@2 d#3@2 d#2@2 d#3@2 d#2@2 d#3@2 d#2]@2
   >`).s("sawtooth").lpf(800)
 )
 

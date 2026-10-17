@@ -9,6 +9,9 @@ from conftest import (
     SHEETS,
     STYLES,
     check_golden,
+    golden_base,
+    has_module,
+    notation_params,
     sheet_js_name,
     sheet_passes,
 )
@@ -55,6 +58,34 @@ def test_chord_sheet_ir_golden(sheet):
 def test_chord_sheet_js_golden(sheet, style):
     pipeline = Pipeline(passes=sheet_passes(style), importer_options=SHEET_FIXTURES[sheet])
     check_golden(SHEETS / sheet_js_name(sheet, style), pipeline.run(SHEETS / sheet))
+
+
+@pytest.mark.skipif(not has_module("guitarpro"), reason="guitarpro extra not installed")
+def test_gp_generator_reproduces_checked_in_file():
+    import make_gp_fixtures
+
+    for name, data in make_gp_fixtures.build_all().items():
+        assert (FIXTURES / "gp" / f"{name}.gp5").read_bytes() == data, f"{name}.gp5 is stale"
+
+
+def test_mxl_generator_reproduces_checked_in_file():
+    import make_mxl
+
+    assert make_mxl.TARGET.read_bytes() == make_mxl.build(), "score_compressed.mxl is stale; rerun make_mxl.py"
+
+
+@pytest.mark.filterwarnings("ignore::strudelizer.StrudelizerWarning")
+@pytest.mark.parametrize("rel,options", notation_params())
+def test_notation_ir_golden(rel, options):
+    song = Pipeline(passes=None, importer_options=options).load(FIXTURES / rel)
+    check_golden(golden_base(rel).with_suffix(".ir.json"), song.to_json())
+
+
+@pytest.mark.filterwarnings("ignore::strudelizer.StrudelizerWarning")
+@pytest.mark.parametrize("rel,options", notation_params())
+def test_notation_js_golden(rel, options):
+    code = Pipeline(importer_options=options).run(FIXTURES / rel)
+    check_golden(golden_base(rel).with_suffix(".js"), code)
 
 
 def _pattern_text(code: str) -> int:

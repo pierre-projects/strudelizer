@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<!-- Original test score for Strudelizer: a one-beat pickup, ties across bar
+     lines, a repeat with 1st and 2nd endings, and harmony symbols
+     (including a slash chord). Played order: 0 1 2 3 1 2 4 5. -->
+<score-partwise version="4.0">
+  <work><work-title>Lighthouse Hymn</work-title></work>
+  <identification><creator type="composer">Strudelizer test suite (original)</creator></identification>
+  <part-list>
+    <score-part id="P1"><part-name>Melody</part-name>
+      <score-instrument id="P1-I1"><instrument-name>Flute</instrument-name></score-instrument>
+      <midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>74</midi-program></midi-instrument>
+    </score-part>
+    <score-part id="P2"><part-name>Bass</part-name>
+      <score-instrument id="P2-I1"><instrument-name>Acoustic Bass</instrument-name></score-instrument>
+      <midi-instrument id="P2-I1"><midi-channel>2</midi-channel><midi-program>33</midi-program></midi-instrument>
+    </score-part>
+  </part-list>
+
+  <part id="P1">
+    <!-- pickup: one beat -->
+    <measure number="0" implicit="yes">
+      <attributes>
+        <divisions>2</divisions>
+        <key><fifths>0</fifths><mode>major</mode></key>
+        <time><beats>4</beats><beat-type>4</beat-type></time>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+      <direction placement="above">
+        <direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>96</per-minute></metronome></direction-type>
+        <sound tempo="96"/>
+      </direction>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>1</duration><type>eighth</type></note>
+    </measure>
+    <measure number="1">
+      <barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>
+      <harmony><root><root-step>C</root-step></root><kind>major</kind></harmony>
+      <note><pitch><step>B</step><octave>4</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>5</octave></pitch><duration>4</duration><tie type="start"/><type>half</type>
+        <notations><tied type="start"/></notations></note>
+    </measure>
+    <measure number="2">
+      <harmony><root><root-step>A</root-step></root><kind>minor-seventh</kind></harmony>
+      <note><pitch><step>D</step><octave>5</octave></pitch><duration>2</duration><tie type="stop"/><type>quarter</type>
+        <notations><tied type="stop"/></notations></note>
+      <note><pitch><step>E</step><octave>5</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>D</step><octave>5</octave></pitch><duration>4</duration><type>half</type></note>
+    </measure>
+    <measure number="3">
+      <barline location="left"><ending number="1" type="start"/></barline>
+      <harmony><root><root-step>D</root-step></root><kind>minor-seventh</kind></harmony>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>4</duration><type>half</type></note>
+      <harmony><root><root-step>G</root-step></root><kind>dominant</kind></harmony>
+      <note><pitch><step>B</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <barline location="right"><bar-style>light-heavy</bar-style><ending number="1" type="stop"/><repeat direction="backward"/></barline>
+    </measure>
+    <measure number="4">
+      <barline location="left"><ending number="2" type="start"/></barline>
+      <harmony><root><root-step>F</root-step></root><kind>major</kind><bass><bass-step>A</bass-step></bass></harmony>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>4</duration><type>half</type></note>
+      <harmony><root><root-step>G</root-step></root><kind>suspended-fourth</kind></harmony>
+      <note><pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch><duration>4</duration><tie type="start"/><type>half</type>
+        <accidental>flat</accidental><notations><tied type="start"/></notations></note>
+      <barline location="right"><ending number="2" type="discontinue"/></barline>
+    </measure>
+    <measure number="5">
+      <harmony><root><root-step>F</root-step></root><kind>major-seventh</kind></harmony>
+      <note><pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch><duration>4</duration><tie type="stop"/><type>half</type>
+        <notations><tied type="stop"/></notations></note>
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <barline location="right"><bar-style>light-heavy</bar-style></barline>
+    </measure>
+  </part>
+
+  <part id="P2">
+    <measure number="0" implicit="yes">
+      <attributes>
+        <divisions>2</divisions>
+        <key><fifths>0</fifths><mode>major</mode></key>
+        <time><beats>4</beats><beat-type>4</beat-type></time>
+        <clef><sign>F</sign><line>4</line></clef>
+      </attributes>
+      <note><rest/><duration>2</duration><type>quarter</type></note>
+    </measure>
+    <measure number="1">
+      <barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>
+      <note><pitch><step>C</step><octave>2</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>G</step><octave>2</octave></pitch><duration>4</duration><tie type="start"/><type>half</type>
+        <notations><tied type="start"/></notations></note>
+    </measure>
+    <measure number="2">
+      <note><pitch><step>G</step><octave>2</octave></pitch><duration>2</duration><tie type="stop"/><type>quarter</type>
+        <notations><tied type="stop"/></notations></note>
+      <note><pitch><step>A</step><octave>2</octave></pitch><duration>6</duration><type>half</type><dot/></note>
+    </measure>
+    <measure number="3">
+      <barline location="left"><ending number="1" type="start"/></barline>
+      <note><pitch><step>D</step><octave>2</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>G</step><octave>2</octave></pitch><duration>4</duration><type>half</type></note>
+      <barline location="right"><bar-style>light-heavy</bar-style><ending number="1" type="stop"/><repeat direction="backward"/></barline>
+    </measure>
+    <measure number="4">
+      <barline location="left"><ending number="2" type="start"/></barline>
+      <note><pitch><step>A</step><octave>2</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>G</step><octave>2</octave></pitch><duration>4</duration><type>half</type></note>
+      <barline location="right"><ending number="2" type="discontinue"/></barline>
+    </measure>
+    <measure number="5">
+      <note><pitch><step>F</step><octave>2</octave></pitch><duration>8</duration><type>whole</type></note>
+      <barline location="right"><bar-style>light-heavy</bar-style></barline>
+    </measure>
+  </part>
+</score-partwise>

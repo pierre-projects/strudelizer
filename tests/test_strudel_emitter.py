@@ -85,9 +85,26 @@ def test_many_bars_use_multiline_backticks():
     assert "note(`<\n  c4 c#4 d4 d#4\n  e4 f4\n>`)" in code
 
 
-def test_note_crossing_barline_is_reattacked():
+def test_note_tied_across_barline_is_held():
     song = Song(tracks=(notes((2, 4, 60)),))
-    assert 'note("<[~ c4] [c4 ~]>")' in emit(song)
+    assert 'note("<[~ c4@2 ~]@2>")' in emit(song)  # one item over 2 cycles
+
+
+def test_tie_spans_are_capped_and_break_at_sections():
+    # a note held across 6 bar lines: joined 4 bars at most, then re-attacked
+    song = Song(tracks=(notes((2, 24, 60)),))
+    assert 'note("<[~ c4@7]@4 [c4@5 ~]@3>")' in emit(song)
+    # a section start always re-attacks
+    song = Song(sections=(Section(0, 1, "a"), Section(1, 1, "b")), tracks=(notes((2, 4, 60)),))
+    code = emit(song)
+    assert 'const a = note("~ c4")' in code and 'const b = note("c4 ~")' in code
+
+
+def test_ties_join_bars_but_repeats_still_collapse():
+    bars = [(4 * b, 4, 60) for b in range(4)] + [(15, 2, 62)]  # d4 tied across bars 4-5
+    song = DedupeBars().run(Song(tracks=(notes(*bars),)), {})
+    # three equal bars still collapse; bars 4-5 are one 2-cycle item holding d4
+    assert 'note("<c4!3 [c4 ~, ~ ~ ~ d4@2 ~ ~ ~]@2>")' in emit(song)
 
 
 def test_drums_use_profile_map_bank_and_velocity_voices():

@@ -110,3 +110,47 @@ def test_round_trip_fidelity(name):
     extra = sum(sum(a.values()) for a in actual) - matched
     ratio = matched / max(total, matched + extra)
     assert ratio >= TARGET, f"{name}: {matched}/{total} notes match ({ratio:.1%}), {extra} extra"
+
+
+# ---- P3 gate: tab / Guitar Pro / MusicXML -> IR -> MIDI -> IR -------------------
+
+from conftest import golden_base, notation_params  # noqa: E402
+
+from strudelizer.core import Chord as _Chord  # noqa: E402
+
+
+def _content(song):
+    """Per track: multiset of (pitch or drum, start, duration) after expanding
+    chords to their pitches, plus the multiset of pitches alone."""
+    parts = []
+    for track in song.tracks:
+        events, pitches = Counter(), Counter()
+        for e in track.events:
+            if isinstance(e, Hit):
+                events[("hit", e.drum, e.start)] += 1
+            elif isinstance(e, _Chord):
+                for p in e.pitches or ():
+                    events[("note", p, e.start, e.duration)] += 1
+                    pitches[p] += 1
+            else:
+                events[("note", e.pitch, e.start, e.duration)] += 1
+                pitches[e.pitch] += 1
+        parts.append((events, pitches))
+    return parts
+
+
+@pytest.mark.filterwarnings("ignore::strudelizer.StrudelizerWarning")
+@pytest.mark.parametrize("rel,options", notation_params())
+def test_notation_round_trip_through_midi(rel, options, tmp_path):
+    pipeline = Pipeline(passes="quantize:16+8t", importer_options=options)
+    source = pipeline.transform(pipeline.load(FIXTURES / rel))
+    midi = tmp_path / (golden_base(rel).name + ".mid")
+    midi.write_bytes(Pipeline(passes=None, emitter="midi").emit(source))
+    again = Pipeline(passes=None).load(midi)
+    before, after = _content(source), _content(again)
+    assert len(before) == len(after), [t.id for t in again.tracks]
+    for (b_events, b_pitches), (a_events, a_pitches), track in zip(before, after, source.tracks):
+        assert a_pitches == b_pitches, f"{rel} track {track.id}: pitches differ"
+        total = sum(b_events.values())
+        matched = sum((b_events & a_events).values())
+        assert matched / max(total, sum(a_events.values())) >= TARGET, f"{rel} track {track.id}: {matched}/{total}"

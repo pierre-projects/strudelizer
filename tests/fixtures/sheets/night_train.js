@@ -10,7 +10,7 @@ const verse = chord(`<
   Cm7 F7 Bb^7 Eb^7
   Cm7 F7 Bb^7 Eb^7
   [Ab^7@3 G7] Cm6 [Do Gaug] Cm
-  Fm9 Bb7 Eb^7!2
+  Fm9 Bb7 Eb^7@2
 >`).voicing().s("triangle").gain(0.6).room(0.2)
 
 const chorus = stack(

@@ -27,6 +27,9 @@ strudelize = "strudelizer.cli:main"
 [project.entry-points."strudelizer.importers"]
 midi = "strudelizer.importers.midi:MidiImporter"
 chordsheet = "strudelizer.importers.chordsheet:ChordSheetImporter"
+ascii_tab = "strudelizer.importers.ascii_tab:AsciiTabImporter"
+guitarpro = "strudelizer.importers.guitarpro:GuitarProImporter [guitarpro]"
+musicxml = "strudelizer.importers.musicxml:MusicXmlImporter [musicxml]"
 
 [project.entry-points."strudelizer.passes"]
 quantize = "strudelizer.passes.quantize:Quantize"

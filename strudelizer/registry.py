@@ -11,6 +11,7 @@ plugin by name.
 
 from __future__ import annotations
 
+import importlib.util
 from dataclasses import dataclass
 from importlib.metadata import EntryPoint, entry_points
 from pathlib import Path
@@ -86,6 +87,7 @@ class PluginInfo:
     target: str
     distribution: str
     entry_point: EntryPoint
+    extras: tuple[str, ...] = ()
 
     def load(self) -> Any:
         try:
@@ -98,17 +100,33 @@ class PluginInfo:
                 fix=f"reinstall or uninstall the '{self.distribution}' package",
             ) from exc
 
+    @property
+    def install_hint(self) -> str:
+        return f'pip install "{self.distribution}[{",".join(self.extras)}]"'
+
+    def missing_modules(self) -> list[str]:
+        """For a plugin behind an optional extra (`name = "mod:Cls [extra]"`):
+        the modules it lists in `requires` that are not installed. Plugin
+        modules import their heavy dependency lazily, so this is cheap."""
+        if not self.extras:
+            return []
+        try:
+            requires = getattr(self.load(), "requires", ())
+        except StrudelizerError:
+            # an optional plugin that cannot even load counts as not installed
+            return [self.target]
+        return [m for m in requires if importlib.util.find_spec(m) is None]
+
 
 def _discover(group: str) -> list[EntryPoint]:
     return list(entry_points(group=group))
 
 
-def available(kind: str) -> list[PluginInfo]:
-    """All installed plugins of one kind, sorted by name."""
+def _all(kind: str) -> list[PluginInfo]:
     found: dict[str, PluginInfo] = {}
     for ep in _discover(GROUPS[kind]):
         dist = ep.dist.name if getattr(ep, "dist", None) is not None else "unknown"
-        info = PluginInfo(kind, ep.name, ep.value, dist, ep)
+        info = PluginInfo(kind, ep.name, ep.value, dist, ep, tuple(getattr(ep, "extras", ()) or ()))
         previous = found.get(ep.name)
         if previous is not None and previous.target != info.target:
             raise StrudelizerError(
@@ -121,11 +139,30 @@ def available(kind: str) -> list[PluginInfo]:
     return [found[name] for name in sorted(found)]
 
 
+def available(kind: str) -> list[PluginInfo]:
+    """Installed plugins of one kind, sorted by name. A plugin behind an
+    optional extra counts only when that extra is installed."""
+    return [info for info in _all(kind) if not info.missing_modules()]
+
+
+def unavailable(kind: str) -> list[PluginInfo]:
+    """Plugins declared by an installed package whose optional extra is not
+    installed (see PluginInfo.install_hint)."""
+    return [info for info in _all(kind) if info.missing_modules()]
+
+
 def _instance(kind: str, name: str) -> Any:
     for info in available(kind):
         if info.name == name:
             obj = info.load()
             return obj() if isinstance(obj, type) else obj
+    for info in unavailable(kind):
+        if info.name == name:
+            raise StrudelizerError(
+                "registry",
+                f"the {kind} '{name}' needs an optional extra that is not installed",
+                fix=info.install_hint,
+            )
     names = ", ".join(i.name for i in available(kind)) or "none"
     raise StrudelizerError(
         "registry",
@@ -153,6 +190,15 @@ def find_importer(path: str | Path) -> Importer:
         importer = obj() if isinstance(obj, type) else obj
         if importer.can_handle(path):
             return importer
+    suffix = Path(path).suffix.lower()
+    for info in unavailable("importer"):
+        if suffix in getattr(info.load(), "extensions", ()):
+            raise StrudelizerError(
+                "import",
+                f"reading {suffix} files needs the '{info.name}' importer, whose optional extra is not installed",
+                location=str(path),
+                fix=info.install_hint,
+            )
     known = []
     for info in available("importer"):
         obj = info.load()

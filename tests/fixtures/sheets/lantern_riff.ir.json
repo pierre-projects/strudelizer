@@ -1,0 +1,233 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Lantern Riff",
+    "bpm": 100,
+    "time_signature": [
+      4,
+      4
+    ],
+    "source": "lantern_riff.cho"
+  },
+  "sections": [
+    {
+      "name": "verse",
+      "start_bar": 0,
+      "length": 4
+    },
+    {
+      "name": "riff",
+      "start_bar": 4,
+      "length": 2
+    }
+  ],
+  "tracks": [
+    {
+      "id": "chords",
+      "role": "chords",
+      "events": [
+        {
+          "type": "chord",
+          "start": "0",
+          "duration": "4",
+          "symbol": "A",
+          "root": "A",
+          "quality": "maj",
+          "pitches": [
+            57,
+            61,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "4",
+          "duration": "4",
+          "symbol": "D",
+          "root": "D",
+          "quality": "maj",
+          "pitches": [
+            50,
+            54,
+            57
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "8",
+          "duration": "4",
+          "symbol": "E",
+          "root": "E",
+          "quality": "maj",
+          "pitches": [
+            52,
+            56,
+            59
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "12",
+          "duration": "4",
+          "symbol": "A",
+          "root": "A",
+          "quality": "maj",
+          "pitches": [
+            57,
+            61,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "24",
+          "duration": "4",
+          "symbol": "F#m",
+          "root": "F#",
+          "quality": "m",
+          "pitches": [
+            54,
+            57,
+            61
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "28",
+          "duration": "4",
+          "symbol": "D",
+          "root": "D",
+          "quality": "maj",
+          "pitches": [
+            50,
+            54,
+            57
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "32",
+          "duration": "4",
+          "symbol": "A",
+          "root": "A",
+          "quality": "maj",
+          "pitches": [
+            57,
+            61,
+            64
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "36",
+          "duration": "4",
+          "symbol": "E",
+          "root": "E",
+          "quality": "maj",
+          "pitches": [
+            52,
+            56,
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "id": "guitar",
+      "role": "melody",
+      "instrument": "gm:25",
+      "events": [
+        {
+          "type": "note",
+          "start": "16",
+          "duration": "1/2",
+          "pitch": 45
+        },
+        {
+          "type": "note",
+          "start": "33/2",
+          "duration": "1/2",
+          "pitch": 52
+        },
+        {
+          "type": "note",
+          "start": "17",
+          "duration": "1/2",
+          "pitch": 54
+        },
+        {
+          "type": "note",
+          "start": "35/2",
+          "duration": "1/2",
+          "pitch": 57
+        },
+        {
+          "type": "note",
+          "start": "18",
+          "duration": "1/2",
+          "pitch": 54
+        },
+        {
+          "type": "note",
+          "start": "37/2",
+          "duration": "1/2",
+          "pitch": 52
+        },
+        {
+          "type": "note",
+          "start": "19",
+          "duration": "1/2",
+          "pitch": 52
+        },
+        {
+          "type": "note",
+          "start": "39/2",
+          "duration": "1/2",
+          "pitch": 54
+        },
+        {
+          "type": "note",
+          "start": "20",
+          "duration": "1/2",
+          "pitch": 59
+        },
+        {
+          "type": "note",
+          "start": "41/2",
+          "duration": "1/2",
+          "pitch": 52
+        },
+        {
+          "type": "note",
+          "start": "40",
+          "duration": "1/2",
+          "pitch": 50
+        },
+        {
+          "type": "note",
+          "start": "40",
+          "duration": "1/2",
+          "pitch": 54
+        },
+        {
+          "type": "note",
+          "start": "40",
+          "duration": "1/2",
+          "pitch": 57
+        },
+        {
+          "type": "note",
+          "start": "40",
+          "duration": "1/2",
+          "pitch": 62
+        },
+        {
+          "type": "note",
+          "start": "40",
+          "duration": "1/2",
+          "pitch": 66
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{title: Lantern Riff}
+{subtitle: Original test song: a ChordPro sheet with tab blocks}
+{tempo: 100}
+{capo: 2}
+
+{start_of_verse}
+[G]Light the [C]lantern, [D]walk the [G]line
+{end_of_verse}
+
+{start_of_tab: Riff}
+e|-------------|-------------|
+B|-------------|-------------|
+G|-------0-----|-------2-----|
+D|---0h2---2-0-|---0h2---0---|
+A|-------------|-------------|
+E|-3-----------|-------------|
+{end_of_tab}
+
+[Em]Ember [C]glow and [G]rest a[D]while
+
+e|---0---|
+B|---1---|
+G|---0---|
+D|---2---|
+A|---3---|
+E|-------|

@@ -1,0 +1,118 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Corner Store Walk",
+    "bpm": 110,
+    "time_signature": [
+      4,
+      4
+    ],
+    "source": "walking_bass.tab"
+  },
+  "sections": [],
+  "tracks": [
+    {
+      "id": "bass",
+      "role": "bass",
+      "instrument": "gm:33",
+      "events": [
+        {
+          "type": "note",
+          "start": "0",
+          "duration": "1",
+          "pitch": 33
+        },
+        {
+          "type": "note",
+          "start": "1",
+          "duration": "1",
+          "pitch": 35
+        },
+        {
+          "type": "note",
+          "start": "2",
+          "duration": "1",
+          "pitch": 38
+        },
+        {
+          "type": "note",
+          "start": "3",
+          "duration": "1",
+          "pitch": 40
+        },
+        {
+          "type": "note",
+          "start": "4",
+          "duration": "1",
+          "pitch": 33
+        },
+        {
+          "type": "note",
+          "start": "5",
+          "duration": "1",
+          "pitch": 36
+        },
+        {
+          "type": "note",
+          "start": "6",
+          "duration": "1",
+          "pitch": 37
+        },
+        {
+          "type": "note",
+          "start": "7",
+          "duration": "1",
+          "pitch": 38
+        },
+        {
+          "type": "note",
+          "start": "8",
+          "duration": "1",
+          "pitch": 33
+        },
+        {
+          "type": "note",
+          "start": "9",
+          "duration": "1",
+          "pitch": 35
+        },
+        {
+          "type": "note",
+          "start": "10",
+          "duration": "1",
+          "pitch": 38
+        },
+        {
+          "type": "note",
+          "start": "11",
+          "duration": "1",
+          "pitch": 40
+        },
+        {
+          "type": "note",
+          "start": "12",
+          "duration": "1",
+          "pitch": 33
+        },
+        {
+          "type": "note",
+          "start": "13",
+          "duration": "1",
+          "pitch": 36
+        },
+        {
+          "type": "note",
+          "start": "14",
+          "duration": "1",
+          "pitch": 37
+        },
+        {
+          "type": "note",
+          "start": "15",
+          "duration": "1",
+          "pitch": 38
+        }
+      ]
+    }
+  ]
+}

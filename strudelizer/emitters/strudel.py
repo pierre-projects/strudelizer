@@ -8,6 +8,10 @@ Layout of the generated code:
 - each track is one pattern, `"<bar0 bar1 ...>"`, with one mini-notation
   bar per cycle; repeated bars collapse to `bar!n`, and a track whose
   bars repeat with a period that divides the song is written once;
+- a note tied across bar lines is held, not re-attacked: the bars it joins
+  are written as one `<...>` item spanning that many cycles,
+  `[c4 d4 e4 f4@2 g4 a4 b4]@2` (at most MAX_TIE_BARS bars, never across a
+  section start);
 - tracks are joined with `stack(...)`; songs with sections get one
   `const` per section joined with `arrange(...)`.
 """
@@ -31,7 +35,7 @@ from ..core.time import (
     bar_offset,
     beats_per_bar,
     lcm_denominator,
-    slice_bars,
+    slice_spans,
     song_length_bars,
     time_signature,
 )
@@ -40,6 +44,7 @@ from ..registry import Emitter
 STAGE = "emit:strudel"
 EXPAND_RESTS_UP_TO = 16  # write `~ ~ ~` on grids up to 16 steps, `~@3` beyond
 BARS_PER_LINE = 4
+MAX_TIE_BARS = 4  # longest run of bars joined to hold a tied note
 INDENT = "  "
 
 # Canonical chord name (core.theory.chord_name of quality + extensions,
@@ -104,8 +109,9 @@ class _Kind:
     """One sub-pattern of a track: drum hits, notes, or chord symbols."""
 
     func: str  # s / note / chord
-    bars: list[dict[Any, list[_Item]]]  # per bar: voice key -> items
+    bars: list[dict[Any, list[_Item]]]  # per span: voice key -> items
     keys: list[Any]  # every voice key, in output order
+    spans: tuple[tuple[int, int], ...]  # (first bar, bar count) of each entry in `bars`
     banked: bool = False  # drums: add the profile's .bank()
     # Velocities that set the scale: every hit of the track, so drums split
     # into banked and unbanked patterns stay relative to each other.
@@ -137,6 +143,7 @@ class _Writer:
         self.dropped: dict[str, int] = defaultdict(int)
         if song.sections:
             self.n_bars = max(self.n_bars, max(s.start_bar + s.length for s in song.sections))
+        self.breaks = {s.start_bar for s in _fill_sections(song.sections, self.n_bars)} if song.sections else set()
         numbered = [(i, t) for i, t in enumerate(song.tracks) if t.events]
         self.tracks = [t for _, t in numbered]
         self.track_names = [_track_name(t, i) for i, t in numbered]
@@ -259,7 +266,7 @@ class _Writer:
                 if not group:
                     continue
                 bars = []
-                for bar in self._slice(group):
+                for bar in self._slice(group, self._single_spans()):
                     voices: dict[Any, list[_Item]] = defaultdict(list)
                     for hit in bar:
                         voice = voices[hit.drum]
@@ -268,25 +275,53 @@ class _Writer:
                     bars.append(dict(voices))
                 keys = [d for d in DRUMS if any(d in b for b in bars)]
                 pool = tuple(h.velocity for h in playable)
-                kinds.append(_Kind("s", bars, keys, banked=banked and bool(drums.get("bank")), pool=pool))
+                spans = self._single_spans()
+                kinds.append(_Kind("s", bars, keys, spans, banked=banked and bool(drums.get("bank")), pool=pool))
         if notes:
-            bars = [_note_voices(bar) for bar in self._slice(notes)]
-            kinds.append(_Kind("note", bars, _int_keys(bars)))
+            spans = self._tie_spans(notes)
+            bars = [_note_voices(seg) for seg in self._slice(notes, spans)]
+            kinds.append(_Kind("note", bars, _int_keys(bars), spans))
         if symbols:
-            bars = [_chord_voices(bar) for bar in self._slice(symbols)]
-            kinds.append(_Kind("chord", bars, _int_keys(bars)))
+            spans = self._tie_spans(symbols)
+            bars = [_chord_voices(seg) for seg in self._slice(symbols, spans)]
+            kinds.append(_Kind("chord", bars, _int_keys(bars), spans))
         return kinds
 
-    def _slice(self, events: Sequence[Any]) -> list[tuple[Any, ...]]:
-        return slice_bars(events, self.bar_len, self.n_bars, self.offset)
+    def _single_spans(self) -> tuple[tuple[int, int], ...]:
+        return tuple((b, 1) for b in range(self.n_bars))
+
+    def _tie_spans(self, events: Sequence[Any]) -> tuple[tuple[int, int], ...]:
+        """Runs of bars joined by notes held across their bar lines."""
+        tied: set[int] = set()  # bar b is tied to bar b - 1
+        for e in events:
+            start = e.start + self.offset
+            end = start + e.duration
+            first = math.floor(start / self.bar_len) + 1
+            for b in range(first, math.ceil(end / self.bar_len)):
+                if start < b * self.bar_len < end:
+                    tied.add(b)
+        spans = []
+        b = 0
+        while b < self.n_bars:
+            k = 1
+            while (b + k < self.n_bars and b + k in tied and b + k not in self.breaks
+                   and k < MAX_TIE_BARS):
+                k += 1
+            spans.append((b, k))
+            b += k
+        return tuple(spans)
+
+    def _slice(self, events: Sequence[Any], spans: Sequence[tuple[int, int]]) -> list[tuple[Any, ...]]:
+        starts = [b * self.bar_len - self.offset for b, _ in spans]
+        ends = [(b + k) * self.bar_len - self.offset for b, k in spans]
+        return slice_spans(events, starts, ends)
 
     def _track_pattern(self, t_index: int, bars: range, indent: str) -> str | None:
         track = self.tracks[t_index]
-        ids = self.ids[t_index]
-        local_ids = _local_ids(ids, bars)
+        collapse = self.ids[t_index] is not None  # dedupe_bars ran
         parts = []
         for kind in self.kinds[t_index]:
-            pattern = self._kind_pattern(track, kind, bars, local_ids, indent)
+            pattern = self._kind_pattern(track, kind, bars, collapse, indent)
             if pattern is not None:
                 parts.append(pattern)
         if not parts:
@@ -297,9 +332,11 @@ class _Writer:
         return "stack(\n" + ",\n".join(inner + _reindent(p, INDENT) for p in parts) + f"\n{indent})"
 
     def _kind_pattern(
-        self, track: Track, kind: _Kind, bars: range, ids: list[int] | None, indent: str
+        self, track: Track, kind: _Kind, bars: range, collapse: bool, indent: str
     ) -> str | None:
-        section = [kind.bars[i] for i in bars]
+        chosen = [i for i, (b, _) in enumerate(kind.spans) if b in bars]  # spans never cross sections
+        section = [kind.bars[i] for i in chosen]
+        lengths = [kind.spans[i][1] for i in chosen]
         if not any(section):
             return None
         velocities = _velocity_scale(kind)
@@ -307,8 +344,8 @@ class _Writer:
         voicing = ".voicing()" if kind.func == "chord" else ""
 
         if velocities is None:
-            bar_strings = [_render_bar(b, kind.keys, self.bar_len) for b in section]
-            mini = _sequence(bar_strings, ids, indent)
+            items = [(_render_bar(b, kind.keys, k * self.bar_len), k) for b, k in zip(section, lengths)]
+            mini = _sequence(items, collapse, indent)
             return f"{kind.func}({mini}){voicing}{suffix}"
 
         # Velocities vary: one pattern per voice so each can carry its own
@@ -319,7 +356,9 @@ class _Writer:
             per_bar = [b.get(key, []) for b in section]
             if not any(per_bar):
                 continue
-            values = _sequence([_render_voice(items, self.bar_len) for items in per_bar], ids, inner)
+            values = _sequence(
+                [(_render_voice(items, k * self.bar_len), k) for items, k in zip(per_bar, lengths)], collapse, inner
+            )
             levels = {velocities[i.velocity] for items in per_bar for i in items}
             pattern = f"{kind.func}({values}){voicing}"
             if len(levels) == 1:
@@ -328,10 +367,11 @@ class _Writer:
                     pattern += f".velocity({level})"
             else:
                 vel_bars = [
-                    _render_voice([_Item(i.start, i.length, velocities[i.velocity], None) for i in items], self.bar_len)
-                    for items in per_bar
+                    (_render_voice([_Item(i.start, i.length, velocities[i.velocity], None) for i in items],
+                                   k * self.bar_len), k)
+                    for items, k in zip(per_bar, lengths)
                 ]
-                pattern += f".velocity({_sequence(vel_bars, ids, inner)})"
+                pattern += f".velocity({_sequence(vel_bars, collapse, inner)})"
             voices.append(pattern)
         if len(voices) == 1:
             return voices[0] + suffix
@@ -467,42 +507,39 @@ def _period(ids: Sequence[int]) -> int:
     return n
 
 
-def _local_ids(ids: list[int] | None, bars: range) -> list[int] | None:
-    """Bar ids renumbered within a range of bars (a section)."""
-    if ids is None:
-        return None
-    first: dict[int, int] = {}
-    return [first.setdefault(ids[b], i) for i, b in enumerate(bars)]
+def _sequence(items: Sequence[tuple[str, int]], collapse: bool, indent: str) -> str:
+    """A quoted mini-notation string: each item is (bar text, cycles), one
+    cycle per bar, or k cycles for k bars joined by a tie (`[...]@k`).
 
-
-def _sequence(bar_strings: Sequence[str], ids: Sequence[int] | None, indent: str) -> str:
-    """A quoted mini-notation string with one bar per cycle.
-
-    `ids` is the track's dedupe_bars map (None: dedupe did not run, write
-    every bar). Bars equal in the track are equal in each of its voices, but
-    a single voice can repeat more often than the whole track (a crash only
-    in bar 1 should not stop the hi-hats collapsing), so repeats are found
-    per rendered sequence, refining the track map.
+    `collapse` is set when dedupe_bars ran. Repeats are then found per
+    rendered sequence: a single voice can repeat more often than its whole
+    track (a crash only in bar 1 should not stop the hi-hats collapsing).
+    Runs of equal one-cycle items become `bar!n`; a sequence whose items
+    repeat with a period that divides it is written once.
     """
-    if ids is None:
-        items = [_wrap(b) for b in bar_strings]
+    def token(text: str, cycles: int) -> str:
+        return _wrap(text) + (f"@{cycles}" if cycles > 1 else "")
+
+    items = list(items)
+    if not collapse:
+        tokens = [token(*item) for item in items]
     else:
-        ids = [bar_strings.index(b) for b in bar_strings]
+        ids = [items.index(item) for item in items]
         p = _period(ids)
-        items = []
+        tokens = []
         i = 0
         while i < p:
             j = i
-            while j + 1 < p and ids[j + 1] == ids[i]:
+            while items[i][1] == 1 and j + 1 < p and ids[j + 1] == ids[i]:
                 j += 1
             count = j - i + 1
-            items.append(_wrap(bar_strings[i]) + (f"!{count}" if count > 1 else ""))
+            tokens.append(token(*items[i]) + (f"!{count}" if count > 1 else ""))
             i = j + 1
-    if len(items) == 1 and "!" not in items[0]:
-        return _str(bar_strings[0])  # the whole track is one repeating bar
-    if len(items) <= BARS_PER_LINE:
-        return _str("<" + " ".join(items) + ">")
-    rows = [" ".join(items[k : k + BARS_PER_LINE]) for k in range(0, len(items), BARS_PER_LINE)]
+    if len(tokens) == 1 and "!" not in tokens[0] and items[0][1] == 1:
+        return _str(items[0][0])  # the whole track is one repeating bar
+    if len(tokens) <= BARS_PER_LINE:
+        return _str("<" + " ".join(tokens) + ">")
+    rows = [" ".join(tokens[k : k + BARS_PER_LINE]) for k in range(0, len(tokens), BARS_PER_LINE)]
     body = "\n".join(f"{indent}{INDENT}{row}" for row in rows)
     return f"`<\n{body}\n{indent}>`"
 

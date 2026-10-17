@@ -19,15 +19,18 @@ from conftest import (
     SHEET_FIXTURES,
     SHEETS,
     STYLES,
+    NOTATION_FIXTURES,
     TESTS,
+    golden_base,
+    has_module,
     sheet_js_name,
     sheet_passes,
 )
 
 from strudelizer import Pipeline, registry
 from strudelizer.core import Chord, Hit, Note
-from strudelizer.core.time import beats_per_bar, song_bars, song_length_bars, time_signature
-from strudelizer.emitters.strudel import _chord_symbol
+from strudelizer.core.time import beats_per_bar, slice_spans, song_bars, song_length_bars, time_signature
+from strudelizer.emitters.strudel import _chord_symbol, _Writer
 
 STRUDEL_DIR = TESTS / "strudel"
 CYCLES = 64  # the longest fixture is ~50 bars; every bar of every song is checked
@@ -52,6 +55,17 @@ def _cases():
                     return pipeline.transform(pipeline.load(SHEETS / sheet))
 
             yield sheet_js_name(sheet, style), SHEETS / sheet_js_name(sheet, style), make
+    for rel, options, module in NOTATION_FIXTURES:
+        if not has_module(module):
+            continue  # the extra is not installed; scripts/check.py insists on it
+
+        def make(rel=rel, options=options):
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                pipeline = Pipeline(importer_options=options)
+                return pipeline.transform(pipeline.load(FIXTURES / rel))
+
+        yield rel, golden_base(rel).with_suffix(".js"), make
 
 
 CASES = list(_cases())
@@ -75,27 +89,45 @@ def strudel_results():
 
 
 def _expected(song, profile="default"):
+    """What Strudel must play, from the IR. Notes start at their IR start and
+    again only where the emitter splits a held note: at the end of a tie
+    span (MAX_TIE_BARS, or a section start). Hits and chords are per bar."""
     drums = registry.get_profile(profile)["drums"]
     drum_map = drums["map"]
     bar_len = beats_per_bar(song.meta)
     n_bars = song_length_bars(song)
+    writer = _Writer(song, registry.get_profile(profile))
     hits, notes, chord_onsets = Counter(), Counter(), set()
-    for track in song.tracks:
+
+    def segments(events, spans):
+        starts = [b * bar_len - writer.offset for b, _ in spans]
+        ends = [(b + k) * bar_len - writer.offset for b, k in spans]
+        for (first, _), seg in zip(spans, slice_spans(events, starts, ends)):
+            for e in seg:
+                yield first + e.start / bar_len, e
+
+    for t_index, track in enumerate(writer.tracks):
+        kinds = {k.func: k for k in writer.kinds[t_index] if k.func != "s"}
+        pitched = [e for e in track.events if isinstance(e, Note)]
+        voiced = []
+        for e in track.events:
+            if isinstance(e, Chord):
+                if _chord_symbol(e) is not None:
+                    voiced.append(e)
+                else:
+                    pitched += [Note(e.start, e.duration, p) for p in e.pitches]
+        hit_events = [e for e in track.events if isinstance(e, Hit)]
         # song_bars applies the pickup offset: bar 1 must start on cycle 1
-        for bar_index, bar in enumerate(song_bars(song, track.events)):
+        for bar_index, bar in enumerate(song_bars(song, hit_events)):
             for e in bar:
-                cycle = bar_index + e.start / bar_len
-                if isinstance(e, Hit):
-                    bank = None if e.drum in drums["unbanked"] else drums["bank"]
-                    hits[(cycle, drum_map[e.drum], bank)] += 1
-                elif isinstance(e, Note):
-                    notes[(cycle, e.pitch)] += 1
-                elif isinstance(e, Chord):
-                    if _chord_symbol(e) is not None:
-                        chord_onsets.add(cycle)
-                    else:
-                        for p in e.pitches:
-                            notes[(cycle, p)] += 1
+                bank = None if e.drum in drums["unbanked"] else drums["bank"]
+                hits[(bar_index + e.start / bar_len, drum_map[e.drum], bank)] += 1
+        if pitched:
+            for cycle, e in segments(pitched, kinds["note"].spans):
+                notes[(cycle, e.pitch)] += 1
+        if voiced:
+            for cycle, _ in segments(voiced, kinds["chord"].spans):
+                chord_onsets.add(cycle)
     return n_bars, hits, notes, chord_onsets
 
 

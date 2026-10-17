@@ -2,43 +2,19 @@
 
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 from fractions import Fraction
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from ..core.errors import StrudelizerError, warn
+from ..core.gm import GM_DRUMS, guess_role, slug
 from ..core.ir import Hit, Meta, Note, Song, Track
+from ..core.time import dominant
 from ..registry import Importer
 
 STAGE = "import:midi"
 DRUM_CHANNEL = 9  # GM channel 10, zero-based
-
-# General MIDI percussion key -> IR drum vocabulary (Decision 3).
-GM_DRUMS = {
-    35: "kick", 36: "kick",
-    37: "rim",
-    38: "snare", 40: "snare",
-    39: "clap",
-    42: "closed_hat", 44: "closed_hat",
-    46: "open_hat",
-    41: "tom_low", 43: "tom_low",
-    45: "tom_mid", 47: "tom_mid",
-    48: "tom_high", 50: "tom_high",
-    49: "crash", 52: "crash", 55: "crash", 57: "crash",
-    51: "ride", 53: "ride", 59: "ride",
-    56: "cowbell",
-    54: "tambourine",
-    69: "shaker", 70: "shaker", 82: "shaker",  # cabasa, maracas, GM2 shaker
-}
-
-_ROLE_KEYWORDS = (
-    ("bass", re.compile(r"bass", re.I)),
-    ("vocal", re.compile(r"vocal|voice|vox|sing", re.I)),
-    ("chords", re.compile(r"chord|pad|keys|piano|organ|comp|rhythm", re.I)),
-    ("melody", re.compile(r"lead|melody|solo|flute|sax|trumpet", re.I)),
-)
 
 DEFAULT_TEMPO = 500000  # microseconds per quarter = 120 bpm
 
@@ -87,53 +63,6 @@ def _absolute(track) -> Iterable[tuple[int, Any]]:
     for msg in track:
         tick += msg.time
         yield tick, msg
-
-
-def _dominant(changes: list[tuple[int, Any]], default: Any, end: int) -> tuple[Any, bool]:
-    """The value that covers the most ticks, earliest on ties; plus 'had others'."""
-    changes = sorted(changes, key=lambda c: c[0])
-    timeline: list[tuple[int, Any]] = []
-    if not changes or changes[0][0] > 0:
-        timeline.append((0, default))
-    for tick, value in changes:
-        if timeline and timeline[-1][0] == tick:
-            timeline[-1] = (tick, value)
-        else:
-            timeline.append((tick, value))
-    coverage: dict[Any, int] = {}
-    first_seen: dict[Any, int] = {}
-    for i, (tick, value) in enumerate(timeline):
-        nxt = timeline[i + 1][0] if i + 1 < len(timeline) else max(end, tick)
-        coverage[value] = coverage.get(value, 0) + (nxt - tick)
-        first_seen.setdefault(value, tick)
-    used = [v for v, c in coverage.items() if c > 0] or [timeline[0][1]]
-    best = max(used, key=lambda v: (coverage.get(v, 0), -first_seen[v]))
-    return best, len(used) > 1
-
-
-def _slug(text: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
-    if slug and slug[0].isdigit():
-        slug = "t_" + slug
-    return slug
-
-
-def _guess_role(name: str, program: int | None, notes: list[tuple[int, int, int, int]]) -> str:
-    for role, pattern in _ROLE_KEYWORDS:
-        if pattern.search(name):
-            return role
-    if program is not None and 32 <= program <= 39:
-        return "bass"
-    pitches = sorted(n[2] for n in notes)
-    if pitches and pitches[len(pitches) // 2] < 48:
-        return "bass"
-    # average number of notes sounding at each onset
-    onsets = sorted({n[0] for n in notes})
-    if onsets:
-        sounding = sum(sum(1 for s, e, _, _ in notes if s <= t < e) for t in onsets)
-        if sounding / len(onsets) >= 2:
-            return "chords"
-    return "melody"
 
 
 def _detect_pickup(meters: list[tuple[int, tuple[int, int]]], tpq: int):
@@ -190,9 +119,9 @@ def _convert(mid, path: Path, options: Mapping[str, Any]) -> Song:
                 notes[(t_index, channel)].append((start, last_tick, pitch, velocity))
         end_tick = max(end_tick, last_tick)
 
-    tempo, tempo_changed = _dominant(tempos, DEFAULT_TEMPO, end_tick)
+    tempo, tempo_changed = dominant(tempos, DEFAULT_TEMPO, end_tick)
     pickup_ticks, main_meters = _detect_pickup(meters, tpq)
-    (num, den), meter_changed = _dominant(main_meters, (4, 4), max(end_tick - pickup_ticks, 0))
+    (num, den), meter_changed = dominant(main_meters, (4, 4), max(end_tick - pickup_ticks, 0))
     scale = Fraction(den, 4)  # quarter-note ticks -> denominator-unit beats
 
     def beats(tick: int) -> Fraction:
@@ -253,7 +182,7 @@ def _convert(mid, path: Path, options: Mapping[str, Any]) -> Song:
                 events.append(Hit(beats(start), drum, velocity))
             instrument = "gm:drums"
         else:
-            role = _guess_role(name, program, raw)
+            role = guess_role(name, program, raw)
             events = [
                 Note(beats(start), beats(max(end - start, 1)), pitch, velocity)
                 for start, end, pitch, velocity in raw
@@ -261,8 +190,8 @@ def _convert(mid, path: Path, options: Mapping[str, Any]) -> Song:
             instrument = f"gm:{program}" if program is not None else None
         if not events:
             continue
-        base = _slug(name) or role
-        if channels_per_track[t_index] > 1 and _slug(name):
+        base = slug(name) or role
+        if channels_per_track[t_index] > 1 and slug(name):
             base = f"{base}_ch{channel + 1}"
         count = used_ids.get(base, 0) + 1
         used_ids[base] = count

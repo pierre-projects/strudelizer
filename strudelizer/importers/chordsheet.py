@@ -26,6 +26,7 @@ is reported as a warning with its line number, and skipped.
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
 from fractions import Fraction
@@ -33,8 +34,17 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..core.errors import StrudelizerError, warn
-from ..core.ir import Chord, Meta, Section, Song, Track
-from ..core.theory import ChordSpelling, is_no_chord, parse_chord
+from ..core.ir import Chord, Meta, Note, Section, Song, Track
+from ..core.tab import TabError, TabNote, find_blocks, parse_tab, tab_role
+from ..core.theory import (
+    ChordSpelling,
+    format_key,
+    is_no_chord,
+    key_prefers_flats,
+    parse_chord,
+    parse_key,
+    transpose_symbol,
+)
 from ..registry import Importer
 
 STAGE = "import:chordsheet"
@@ -63,7 +73,7 @@ _TAB_START = {"start_of_tab", "sot"}
 _TAB_END = {"end_of_tab", "eot"}
 _IGNORED = {
     "subtitle", "st", "artist", "composer", "lyricist", "album", "year", "copyright",
-    "comment", "c", "comment_italic", "ci", "comment_box", "cb", "highlight", "capo",
+    "comment", "c", "comment_italic", "ci", "comment_box", "cb", "highlight",
     "duration", "meta", "textfont", "textsize", "chordfont", "chordsize", "define", "chord",
 }
 
@@ -117,6 +127,11 @@ class _Parser:
     last_chorus: tuple[list[_Event], Fraction] | None = None
     unparsed: int = 0
     in_tab: bool = False  # inside {start_of_tab} ... {end_of_tab}
+    tab_label: str | None = None
+    tab_lines: list[tuple[int, str]] = field(default_factory=list)
+    tab_notes: list[TabNote] = field(default_factory=list)
+    tab_strings: int = 0
+    capo: int = 0
 
     # ---- time line -------------------------------------------------------------
 
@@ -252,6 +267,9 @@ class _Parser:
             self.end_section()
         elif name == "chorus":
             self.recall_chorus(value, lineno)
+        elif name == "capo":
+            if self.options.get("capo") is None:  # the --capo option wins
+                self.capo = _capo(value, f"line {lineno}")
         elif name in _IGNORED or name.startswith("x_"):
             pass
         elif name in ("new_song", "ns"):
@@ -424,23 +442,81 @@ class _Parser:
 
     # ---- result ----------------------------------------------------------------------
 
+    def tab_block(self, lines: list[tuple[int, str]], label: str | None) -> None:
+        """A tab block takes its own time on a separate tab track; the chord
+        before it holds to the bar line, and the song resumes on the next
+        bar line after it."""
+        if label:
+            self.start_section(_section_name(label))
+        else:
+            self.align()
+        self._begin()
+        if self.pickup_pending:  # a tab right at the start begins on bar 1
+            self.pickup_pending = False
+            self.time += self.pickup  # type: ignore[operator]
+        try:
+            result = parse_tab(
+                lines,
+                tuning=self.options.get("tuning"),
+                rhythm=str(self.options.get("tab_rhythm") or "even8"),
+                bar_beats=self.bar_len,
+                beat_unit=self.meter[1],
+                start=self.time,
+            )
+        except TabError as exc:
+            raise StrudelizerError(
+                STAGE, str(exc), location=f"line {lines[0][0] if lines else '?'}",
+                fix='e.g. --tuning "D A D G B E" (lowest string first)',
+            ) from None
+        for lineno, line, reason in result.problems:
+            self.report(lineno, line, reason)
+        self.tab_notes += result.notes
+        self.tab_strings = max(self.tab_strings, result.strings)
+        if result.length:
+            bars = math.ceil(result.length / self.bar_len)
+            self.time += bars * self.bar_len
+        if label:
+            self.end_section()
+
     def song(self, text: str) -> Song:
         if self.options.get("pickup") is not None:
             self.set_pickup(self.options["pickup"], "option pickup")
-        for lineno, raw in enumerate(text.splitlines(), 1):
+        if self.options.get("capo") is not None:
+            self.capo = _capo(self.options["capo"], "option capo")
+        lines = list(enumerate(text.splitlines(), 1))
+        # bare tab blocks (outside {start_of_tab}): first line -> block lines
+        bare: dict[int, list[tuple[int, str]]] = {}
+        in_block: set[int] = set()
+        for block in find_blocks(lines):
+            if 4 <= len(block) <= 7:
+                bare[block[0].lineno] = [(s.lineno, lines[s.lineno - 1][1]) for s in block]
+                in_block.update(s.lineno for s in block)
+        for lineno, raw in lines:
+            directive = _DIRECTIVE.match(raw.strip())
             if self.in_tab:
-                d = _DIRECTIVE.match(raw.strip())
-                if d and d.group(1).lower() in _TAB_END:
+                if directive and directive.group(1).lower() in _TAB_END:
                     self.in_tab = False
+                    self.tab_block(self.tab_lines, self.tab_label)
+                else:
+                    self.tab_lines.append((lineno, raw))
                 continue
-            d = _DIRECTIVE.match(raw.strip())
-            if d and d.group(1).lower() in _TAB_START:
-                self.in_tab = True  # tabs are a later phase (P3): skip the block
-                warn(STAGE, f"line {lineno}: skipped a tab block (tabs are not read from chord sheets)")
+            if directive and directive.group(1).lower() in _TAB_START:
+                self.in_tab = True
+                self.tab_label = directive.group(2) or None
+                self.tab_lines = []
+                continue
+            if lineno in bare:
+                self.tab_block(bare[lineno], None)
+                continue
+            if lineno in in_block:
                 continue
             self.line(raw, lineno)
+        if self.in_tab:
+            warn(STAGE, "a {start_of_tab} block has no {end_of_tab}; read it to the end of the file")
+            self.in_tab = False
+            self.tab_block(self.tab_lines, self.tab_label)
         self.end_section()
-        if not self.events:
+        if not self.events and not self.tab_notes:
             raise StrudelizerError(
                 STAGE, "no chords found", location=str(self.path),
                 fix="write chords as [C] (ChordPro), on their own line, or as | C | G | bars",
@@ -454,31 +530,63 @@ class _Parser:
         bpm = float(bpm)
         if bpm <= 0:
             raise StrudelizerError(STAGE, f"bpm must be positive, not {bpm}", location="option bpm")
-        events = tuple(
-            Chord(
-                e.start,
-                e.duration,
-                e.symbol,
-                root=e.chord.root,
-                quality=e.chord.quality,
-                extensions=e.chord.extensions or None,
-                bass=e.chord.bass,
-                pitches=e.chord.pitches(),
+
+        # A capo makes everything sound higher: chords are written as shapes.
+        key = self.key
+        flats = None
+        if self.capo and key:
+            parsed = parse_key(key)
+            if parsed is not None:
+                key = format_key((parsed[0] + self.capo) % 12, parsed[1])
+                flats = key_prefers_flats(key)
+        events = []
+        for e in self.events:
+            symbol, chord = e.symbol, e.chord
+            if self.capo:
+                symbol = transpose_symbol(e.symbol, self.capo, flats) or e.symbol
+                chord = parse_chord(symbol) or chord
+            events.append(
+                Chord(
+                    e.start,
+                    e.duration,
+                    symbol,
+                    root=chord.root,
+                    quality=chord.quality,
+                    extensions=chord.extensions or None,
+                    bass=chord.bass,
+                    pitches=chord.pitches(),
+                )
             )
-            for e in self.events
-        )
+        tracks = []
+        if events:
+            tracks.append(Track(events=tuple(events), id="chords", role="chords"))
+        if self.tab_notes:
+            notes = [Note(n.start, n.duration, n.pitch + self.capo) for n in self.tab_notes]
+            track_id, role = tab_role(self.tab_strings, notes)
+            tracks.append(Track(events=tuple(notes), id=track_id, role=role,
+                                instrument="gm:33" if role == "bass" else "gm:25"))
         return Song(
             meta=Meta(
                 title=self.title or self.first_text or self.path.stem,
                 bpm=int(bpm) if bpm.is_integer() else bpm,
                 time_signature=self.meter,
-                key=self.key,
+                key=key,
                 source=self.path.name,
                 pickup_beats=self.pickup,
             ),
             sections=tuple(self.sections),
-            tracks=(Track(events=events, id="chords", role="chords"),),
+            tracks=tuple(tracks),
         )
+
+
+def _capo(value, where: str) -> int:
+    try:
+        capo = int(str(value).strip())
+        assert 0 <= capo <= 24
+        return capo
+    except (ValueError, AssertionError):
+        raise StrudelizerError(STAGE, f"capo must be a fret number from 0 to 24, not {value!r}",
+                               location=where, fix="e.g. {capo: 2} or --capo 2") from None
 
 
 class ChordSheetImporter(Importer):

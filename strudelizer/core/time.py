@@ -6,10 +6,11 @@ IR times are beats, where one beat is the time signature's denominator unit
 
 from __future__ import annotations
 
+import bisect
 import math
 from dataclasses import replace
 from fractions import Fraction
-from typing import TYPE_CHECKING, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 if TYPE_CHECKING:
     from .ir import Event, Meta, Song
@@ -52,6 +53,30 @@ def bar_offset(meta: "Meta") -> Fraction:
     if not meta.pickup_beats:
         return Fraction(0)
     return beats_per_bar(meta) - meta.pickup_beats
+
+
+def dominant(changes: list[tuple[Any, Any]], default: Any, end: Any) -> tuple[Any, bool]:
+    """Decision 4's rule for tempo and meter: the value in force for the
+    longest time wins (earliest on ties). `changes` are (time, value) in any
+    time unit. Returns (value, whether other values were also used)."""
+    changes = sorted(changes, key=lambda c: c[0])
+    timeline: list[tuple[Any, Any]] = []
+    if not changes or changes[0][0] > 0:
+        timeline.append((0, default))
+    for time, value in changes:
+        if timeline and timeline[-1][0] == time:
+            timeline[-1] = (time, value)
+        else:
+            timeline.append((time, value))
+    coverage: dict[Any, Any] = {}
+    first_seen: dict[Any, Any] = {}
+    for i, (time, value) in enumerate(timeline):
+        nxt = timeline[i + 1][0] if i + 1 < len(timeline) else max(end, time)
+        coverage[value] = coverage.get(value, 0) + (nxt - time)
+        first_seen.setdefault(value, time)
+    used = [v for v, c in coverage.items() if c > 0] or [timeline[0][1]]
+    best = max(used, key=lambda v: (coverage.get(v, 0), -first_seen[v]))
+    return best, len(used) > 1
 
 
 def event_end(event: "Event") -> Fraction:
@@ -112,6 +137,33 @@ def slice_bars(
             start = seg_end
             index += 1
     return [tuple(sort_events(bar)) for bar in bars]
+
+
+def slice_spans(
+    events: Iterable["Event"], starts: Sequence[Fraction], ends: Sequence[Fraction]
+) -> list[tuple["Event", ...]]:
+    """Like slice_bars, for consecutive spans [starts[i], ends[i]) of any
+    length (in event time). Times come back relative to each span's start;
+    events crossing a span boundary are split there."""
+    from .ir import sort_events
+
+    out: list[list["Event"]] = [[] for _ in starts]
+    for event in events:
+        duration = getattr(event, "duration", None)
+        if duration is None:
+            i = bisect.bisect_right(starts, event.start) - 1
+            if 0 <= i < len(starts) and event.start < ends[i]:
+                out[i].append(replace(event, start=event.start - starts[i]))
+            continue
+        start, end = event.start, event.start + duration
+        i = max(bisect.bisect_right(starts, start) - 1, 0)
+        while start < end and i < len(starts):
+            seg_end = min(end, ends[i])
+            if seg_end > start and start >= starts[i]:
+                out[i].append(replace(event, start=start - starts[i], duration=seg_end - start))
+                start = seg_end
+            i += 1
+    return [tuple(sort_events(seg)) for seg in out]
 
 
 def song_bars(song: "Song", track_events: Iterable["Event"]) -> list[tuple["Event", ...]]:

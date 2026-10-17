@@ -1,0 +1,329 @@
+{
+  "version": "2",
+  "meta": {
+    "title": "Lighthouse Hymn",
+    "bpm": 96,
+    "time_signature": [
+      4,
+      4
+    ],
+    "key": "C",
+    "source": "score.musicxml",
+    "pickup_beats": "1"
+  },
+  "sections": [],
+  "tracks": [
+    {
+      "id": "chords",
+      "role": "chords",
+      "events": [
+        {
+          "type": "chord",
+          "start": "1",
+          "duration": "4",
+          "symbol": "C",
+          "root": "C",
+          "quality": "maj",
+          "pitches": [
+            48,
+            52,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "5",
+          "duration": "4",
+          "symbol": "Am7",
+          "root": "A",
+          "quality": "m7",
+          "pitches": [
+            57,
+            60,
+            64,
+            67
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "9",
+          "duration": "2",
+          "symbol": "Dm7",
+          "root": "D",
+          "quality": "m7",
+          "pitches": [
+            50,
+            53,
+            57,
+            60
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "11",
+          "duration": "2",
+          "symbol": "G7",
+          "root": "G",
+          "quality": "7",
+          "pitches": [
+            55,
+            59,
+            62,
+            65
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "13",
+          "duration": "4",
+          "symbol": "C",
+          "root": "C",
+          "quality": "maj",
+          "pitches": [
+            48,
+            52,
+            55
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "17",
+          "duration": "4",
+          "symbol": "Am7",
+          "root": "A",
+          "quality": "m7",
+          "pitches": [
+            57,
+            60,
+            64,
+            67
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "21",
+          "duration": "2",
+          "symbol": "F/A",
+          "root": "F",
+          "quality": "maj",
+          "bass": "A",
+          "pitches": [
+            45,
+            53,
+            57,
+            60
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "23",
+          "duration": "2",
+          "symbol": "Gsus4",
+          "root": "G",
+          "quality": "sus4",
+          "pitches": [
+            55,
+            60,
+            62
+          ]
+        },
+        {
+          "type": "chord",
+          "start": "25",
+          "duration": "4",
+          "symbol": "Fmaj7",
+          "root": "F",
+          "quality": "maj7",
+          "pitches": [
+            53,
+            57,
+            60,
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "id": "melody",
+      "role": "melody",
+      "instrument": "gm:73",
+      "events": [
+        {
+          "type": "note",
+          "start": "0",
+          "duration": "1/2",
+          "pitch": 67
+        },
+        {
+          "type": "note",
+          "start": "1/2",
+          "duration": "1/2",
+          "pitch": 69
+        },
+        {
+          "type": "note",
+          "start": "1",
+          "duration": "1",
+          "pitch": 71
+        },
+        {
+          "type": "note",
+          "start": "2",
+          "duration": "1",
+          "pitch": 72
+        },
+        {
+          "type": "note",
+          "start": "3",
+          "duration": "3",
+          "pitch": 74
+        },
+        {
+          "type": "note",
+          "start": "6",
+          "duration": "1",
+          "pitch": 76
+        },
+        {
+          "type": "note",
+          "start": "7",
+          "duration": "2",
+          "pitch": 74
+        },
+        {
+          "type": "note",
+          "start": "9",
+          "duration": "2",
+          "pitch": 72
+        },
+        {
+          "type": "note",
+          "start": "11",
+          "duration": "2",
+          "pitch": 71
+        },
+        {
+          "type": "note",
+          "start": "13",
+          "duration": "1",
+          "pitch": 71
+        },
+        {
+          "type": "note",
+          "start": "14",
+          "duration": "1",
+          "pitch": 72
+        },
+        {
+          "type": "note",
+          "start": "15",
+          "duration": "3",
+          "pitch": 74
+        },
+        {
+          "type": "note",
+          "start": "18",
+          "duration": "1",
+          "pitch": 76
+        },
+        {
+          "type": "note",
+          "start": "19",
+          "duration": "2",
+          "pitch": 74
+        },
+        {
+          "type": "note",
+          "start": "21",
+          "duration": "2",
+          "pitch": 72
+        },
+        {
+          "type": "note",
+          "start": "23",
+          "duration": "4",
+          "pitch": 70
+        },
+        {
+          "type": "note",
+          "start": "27",
+          "duration": "2",
+          "pitch": 69
+        }
+      ]
+    },
+    {
+      "id": "bass",
+      "role": "bass",
+      "instrument": "gm:32",
+      "events": [
+        {
+          "type": "note",
+          "start": "1",
+          "duration": "2",
+          "pitch": 36
+        },
+        {
+          "type": "note",
+          "start": "3",
+          "duration": "3",
+          "pitch": 43
+        },
+        {
+          "type": "note",
+          "start": "6",
+          "duration": "3",
+          "pitch": 45
+        },
+        {
+          "type": "note",
+          "start": "9",
+          "duration": "2",
+          "pitch": 38
+        },
+        {
+          "type": "note",
+          "start": "11",
+          "duration": "2",
+          "pitch": 43
+        },
+        {
+          "type": "note",
+          "start": "13",
+          "duration": "2",
+          "pitch": 36
+        },
+        {
+          "type": "note",
+          "start": "15",
+          "duration": "3",
+          "pitch": 43
+        },
+        {
+          "type": "note",
+          "start": "18",
+          "duration": "3",
+          "pitch": 45
+        },
+        {
+          "type": "note",
+          "start": "21",
+          "duration": "2",
+          "pitch": 45
+        },
+        {
+          "type": "note",
+          "start": "23",
+          "duration": "2",
+          "pitch": 43
+        },
+        {
+          "type": "note",
+          "start": "25",
+          "duration": "4",
+          "pitch": 41
+        }
+      ]
+    }
+  ]
+}

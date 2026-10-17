@@ -21,7 +21,41 @@ SHEET_FIXTURES = {
     "paper_kites.txt": {"bpm": 84},
     "night_train.txt": {"bpm": 90},
 }
+SHEET_FIXTURES["lantern_riff.cho"] = {}  # ChordPro with tab blocks and a capo
 STYLES = ["lofi", "rock", "four_on_floor"]
+
+# P3 notation fixtures: (path under fixtures/, importer options, module the
+# importer needs). Golden files sit next to each fixture: <stem>.ir.json, <stem>.js.
+NOTATION_FIXTURES = [
+    ("tabs/riff.txt", {}, None),
+    ("tabs/capo_waltz.tab", {"tab_rhythm": "columns"}, None),
+    ("tabs/walking_bass.tab", {"tab_rhythm": "columns"}, None),
+    ("gp/song.gp5", {}, "guitarpro"),
+    ("musicxml/score.musicxml", {}, "music21"),
+    ("musicxml/score_compressed.mxl", {}, "music21"),
+]
+
+
+def has_module(name) -> bool:
+    import importlib.util
+
+    return name is None or importlib.util.find_spec(name) is not None
+
+
+def notation_params():
+    """pytest params for NOTATION_FIXTURES; extras that are not installed skip."""
+    out = []
+    for rel, options, module in NOTATION_FIXTURES:
+        marks = [] if has_module(module) else [
+            pytest.mark.skip(reason=f"{module} not installed (pip install -e \".[all]\")")
+        ]
+        out.append(pytest.param(rel, options, id=rel, marks=marks))
+    return out
+
+
+def golden_base(rel: str) -> Path:
+    path = FIXTURES / rel
+    return path.with_name(path.stem)
 
 
 def sheet_passes(style):
