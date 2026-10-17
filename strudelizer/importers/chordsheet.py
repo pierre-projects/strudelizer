@@ -16,7 +16,8 @@ c) Bar lines: `| Am | F | C G |`. Chords in one bar split it evenly; `/`
 In (a) and (b) each chord lasts `beats_per_chord` beats (default one bar).
 Section labels: `[Verse]`, `Chorus:`, `Bridge 2:` or ChordPro's
 `{start_of_*}` directives. A pickup (partial first bar) is declared with
-`{pickup: 1}` (or `{x_pickup: 1}`) or the --pickup option: the first chord
+`{x_pickup: 1}` (ChordPro's x_ prefix marks custom directives; `{pickup: 1}`
+is accepted as an alias) or the --pickup option: the first chord
 (or first bar) then lasts that many beats.
 
 Every line that looks like it was meant to hold chords but does not parse
@@ -240,7 +241,7 @@ class _Parser:
                                           "put {time} before the first chord")
             else:
                 self.meter = (int(match.group(1)), int(match.group(2)))
-        elif name in ("pickup", "x_pickup"):
+        elif name in ("x_pickup", "pickup"):  # x_pickup is canonical; pickup is an alias
             if self.options.get("pickup") is None:  # the --pickup option wins
                 self.set_pickup(value, f"line {lineno}")
         elif name in _START:
@@ -271,7 +272,7 @@ class _Parser:
         if not 0 < beats < self.bar_len:
             raise StrudelizerError(
                 STAGE, f"pickup must be between 0 and {self.bar_len} beats, not {value!r}",
-                location=where, fix="a pickup is a partial first bar, e.g. {pickup: 1}",
+                location=where, fix="a pickup is a partial first bar, e.g. {x_pickup: 1}",
             )
         self.pickup = beats
 

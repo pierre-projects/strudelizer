@@ -312,11 +312,16 @@ worth a second look.
       evenly among its tokens. `/` or `.` holds the previous chord for a slot,
       `%` repeats the previous bar, an empty bar holds the chord, `|: :|`
       repeats within a line, and a trailing `x2` repeats the line.
-    - **Pickup.** It comes from `{pickup: N}` (or `{x_pickup: N}`, the
-      ChordPro custom-directive form) or `--pickup`, with `--pickup` winning.
-      The first chord, or first bar, then lasts the pickup. There is no
-      standard pickup notation in chord sheets, so this directive is my
-      invention. **review**
+    - **Pickup.** It comes from `{x_pickup: N}` or `--pickup`, with
+      `--pickup` winning. The first chord, or first bar, then lasts the
+      pickup.
+      - `x_pickup` is the canonical name, because the ChordPro spec reserves
+        the `x_` prefix for custom directives and standard ChordPro has no
+        pickup directive.
+      - `{pickup: N}` is accepted as an alias for sheets that are not strict
+        ChordPro (the chords-over-lyrics and bar-line fixtures use it, so both
+        spellings stay tested).
+      - (Changed in P3: P2 treated `{pickup}` as primary.)
     - **Tempo.** `--bpm` wins over `{tempo}`. With neither, 100 bpm with a
       warning. bpm counts beats of the time signature's denominator, like the
       IR.

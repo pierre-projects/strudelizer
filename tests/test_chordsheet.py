@@ -175,6 +175,17 @@ def test_errors(tmp_path):
         ChordSheetImporter().load(big, {"bpm": 90})
 
 
+@pytest.mark.parametrize("directive", ["x_pickup", "pickup"])
+def test_pickup_directive_canonical_and_alias(tmp_path, directive):
+    path = tmp_path / "p.cho"
+    path.write_text(f"{{tempo: 90}}\n{{{directive}: 1}}\n[G]up [C]beat\n", encoding="utf-8")
+    song = ChordSheetImporter().load(path, {})
+    assert song.meta.pickup_beats == F(1)
+    assert chords(song)[0] == (F(0), F(1), "G")
+    # the --pickup option wins over the directive
+    assert ChordSheetImporter().load(path, {"pickup": "2"}).meta.pickup_beats == F(2)
+
+
 def test_tab_blocks_are_skipped(tmp_path):
     path = tmp_path / "t.cho"
     path.write_text("{tempo: 90}\n[C]a\n{start_of_tab}\ne|---0---|\n{end_of_tab}\n[G]b\n")

@@ -156,7 +156,7 @@ Intro: | N.C. | Cm | Cmin | C- |       Bar lines: chords in a bar split it evenl
 - **Directives:** `{title}`, `{key}`, `{tempo}` and `{time: 3/4}`, plus section
   directives (`{start_of_chorus}` / `{soc}`, `{sov}`, `{sob}`, `{chorus}` to repeat the
   chorus). Section labels can also be written `[Verse]`, `Chorus:` or `Bridge 2:`.
-- **Pickup:** `{pickup: 1}` or `--pickup 1`. The first chord, or first bar, lasts that
+- **Pickup:** `{x_pickup: 1}` (alias `{pickup: 1}`) or `--pickup 1`. The first chord, or first bar, lasts that
   many beats, and bar 1 starts on Strudel cycle 1.
 - **Chord spellings:** all of these are accepted: `C`, `Cm`/`Cmin`/`C-`, `C7`,
   `Cmaj7`/`CM7`/`C^7`/`CΔ`, `Cm7`, `C6`, `Cm6`, `C9`, `Cadd9`, `Csus2`, `Csus4`,
@@ -321,11 +321,14 @@ After `pip install -e my_tabs`, `strudelize list` shows `mytab`, and
 ## Development
 
 ```sh
-pip install -e ".[dev]"
-npm ci --prefix tests/strudel     # pinned Strudel runtime for the validity tests
-pytest                            # always runs in strict mode
+pip install -e ".[all]"           # dev tools plus the guitarpro and musicxml extras
+python scripts/check.py           # lint + tests (strict) + Strudel check; installs the
+                                  # pinned Strudel runtime with npm ci on first run
+python scripts/check.py test -k chordsheet    # or: lint | test [pytest args] | strudel
 python tests/bench_dense.py       # NFR-6 timing on a dense 5-minute song
 ```
+
+`make check`, `make test` and the other Makefile targets just call `scripts/check.py`.
 
 The test suite covers:
 

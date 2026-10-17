@@ -2,7 +2,7 @@
 {subtitle: An original test song for Strudelizer (ChordPro format)}
 {key: G}
 {tempo: 92}
-{pickup: 2}
+{x_pickup: 2}
 # Every Decision 2 spelling appears below. Two lines must be reported as
 # unparsed: the one with [Q7] and the unknown {flourish} directive.
 

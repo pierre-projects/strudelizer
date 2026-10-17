@@ -1,27 +1,25 @@
+# Thin wrapper around scripts/check.py, which works without make.
 PYTHON ?= python
-STRUDEL_DIR = tests/strudel
 
-.PHONY: install strudel-deps strudel-check test golden fixtures ci
+.PHONY: install check lint test strudel-check fixtures golden
 
 install:
-	$(PYTHON) -m pip install -e ".[dev]"
+	$(PYTHON) -m pip install -e ".[all]"
 
-# Pinned Strudel runtime (@strudel/* 1.2.6, exact versions in package-lock.json)
-strudel-deps:
-	npm ci --prefix $(STRUDEL_DIR)
+check:
+	$(PYTHON) scripts/check.py
 
-# Evaluate every golden .js in Strudel and query its first cycles
-strudel-check: strudel-deps
-	cd $(STRUDEL_DIR) && node validate.mjs --cycles 8 ../fixtures/*.js ../fixtures/ir/*.js > /dev/null && echo "strudel-check: all files evaluate"
+lint:
+	$(PYTHON) scripts/check.py lint
 
 test:
-	$(PYTHON) -m pytest
+	$(PYTHON) scripts/check.py test
 
-# Regenerate MIDI fixtures, then golden .ir.json/.js files (review the diff!)
+strudel-check:
+	$(PYTHON) scripts/check.py strudel
+
 fixtures:
 	$(PYTHON) tests/fixtures/make_fixtures.py
 
 golden:
 	STRUDELIZER_UPDATE_GOLDEN=1 $(PYTHON) -m pytest tests/test_golden.py
-
-ci: install strudel-deps test

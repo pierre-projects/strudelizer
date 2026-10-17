@@ -15,7 +15,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+guitarpro = ["PyGuitarPro>=0.9"]
+musicxml = ["music21>=9"]
+dev = ["pytest>=7", "pyflakes>=3"]
+all = ["strudelizer[guitarpro,musicxml,dev]"]
 
 [project.scripts]
 strudelize = "strudelizer.cli:main"
