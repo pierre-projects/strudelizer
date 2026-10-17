@@ -108,14 +108,19 @@ test('clicking a bar shows the code that bar came from', async ({ page }) => {
   await expect.poll(() => editorCode(page)).toContain('const verse');
 
   await page.locator('.lane.ruler .bar', { hasText: /^6$/ }).click();
-  const line = await page.evaluate(() => {
-    const element = document.querySelector('strudel-editor') as { editor?: { editor?: any } } | null;
-    const view = element?.editor?.editor;
-    return view.state.doc.lineAt(view.state.selection.main.head).number;
-  });
-  // Bar 6 is in the verse, which is the second const in the file.
-  const code = (await editorCode(page)).split('\n');
-  expect(code.slice(0, line).reverse().find((text) => text.startsWith('const '))).toContain('verse');
+  // Bar 6 is in the verse, which is the second const in the file. The editor
+  // moves its cursor after the click is handled, so wait for it to get there.
+  await expect
+    .poll(async () => {
+      const line = await page.evaluate(() => {
+        const element = document.querySelector('strudel-editor') as { editor?: { editor?: any } } | null;
+        const view = element?.editor?.editor;
+        return view.state.doc.lineAt(view.state.selection.main.head).number;
+      });
+      const code = (await editorCode(page)).split('\n');
+      return code.slice(0, line).reverse().find((text) => text.startsWith('const ')) ?? '';
+    })
+    .toContain('verse');
 });
 
 test('an unreadable file is reported the way the CLI reports it', async ({ page }) => {
