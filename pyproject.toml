@@ -17,8 +17,9 @@ dependencies = [
 [project.optional-dependencies]
 guitarpro = ["PyGuitarPro>=0.9"]
 musicxml = ["music21>=9"]
-dev = ["pytest>=7", "pyflakes>=3"]
-all = ["strudelizer[guitarpro,musicxml,dev]"]
+ui = ["fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9"]
+dev = ["pytest>=7", "pyflakes>=3", "httpx>=0.27"]
+all = ["strudelizer[guitarpro,musicxml,ui,dev]"]
 
 [project.scripts]
 strudelize = "strudelizer.cli:main"
@@ -51,12 +52,13 @@ rock = "strudelizer.styles:rock"
 four_on_floor = "strudelizer.styles:four_on_floor"
 
 [tool.setuptools.packages.find]
-include = ["strudelizer*"]
+include = ["strudelizer*", "strudelizer_ui*"]
 
 [tool.setuptools.package-data]
 "strudelizer.core" = ["schema.json"]
 "strudelizer.profiles" = ["*.yaml"]
 "strudelizer.styles" = ["*.yaml"]
+"strudelizer_ui" = ["static/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

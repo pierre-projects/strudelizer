@@ -6,6 +6,7 @@
     strudelize pass song.ir.json --passes quantize:16 -o song.q.ir.json
     strudelize emit song.ir.json -o song.js [--profile techno]
     strudelize list
+    strudelize ui
 """
 
 from __future__ import annotations
@@ -20,7 +21,7 @@ from . import __version__, registry
 from .core.errors import StrudelizerError, StrudelizerWarning
 from .pipeline import DEFAULT_PASSES, Pipeline
 
-COMMANDS = ("import", "pass", "emit", "list")
+COMMANDS = ("import", "pass", "emit", "list", "ui")
 
 
 def _write(data: str | bytes, output: str | None) -> None:
@@ -87,7 +88,25 @@ def _staged_parser() -> argparse.ArgumentParser:
     emit.add_argument("--profile", help="sound profile name or .yaml path")
 
     sub.add_parser("list", help="show installed importers, passes, emitters, profiles and styles")
+
+    ui = sub.add_parser("ui", help="open the local web UI in a browser (needs the [ui] extra)")
+    ui.add_argument("--host", default="127.0.0.1", help="address to listen on (default 127.0.0.1)")
+    ui.add_argument("--port", type=int, default=8765, help="port (default 8765)")
+    ui.add_argument("--no-browser", action="store_true", help="do not open a browser window")
     return p
+
+
+def _ui(args: argparse.Namespace) -> None:
+    """The only thing the core knows about the UI: how to start it."""
+    try:
+        from strudelizer_ui.server import serve
+    except ImportError as exc:
+        raise StrudelizerError(
+            "ui",
+            f"the web UI is not installed ({exc.name})",
+            fix='install it with: pip install -e ".[ui]"',
+        ) from None
+    serve(host=args.host, port=args.port, open_browser=not args.no_browser)
 
 
 def _emitter(name: str | None, output: str | None):
@@ -146,6 +165,8 @@ def run(argv: Sequence[str]) -> None:
         args = _staged_parser().parse_args(argv)
         if args.command == "list":
             _write(_list(), None)
+        elif args.command == "ui":
+            _ui(args)
         elif args.command == "import":
             pipeline = Pipeline(importer=args.importer, passes=None, importer_options=_importer_options(args))
             _write(pipeline.save_ir(pipeline.load(args.input)), args.output)
