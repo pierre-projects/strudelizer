@@ -471,20 +471,28 @@ textarea {
 
 /* ---- code and playback -------------------------------------------------------- */
 
+/* <strudel-editor> stays empty: it inserts the editor as its next sibling, so
+   the element itself must not take up space. */
 .editor-wrap {
-  position: relative;
-  min-height: 320px;
   border-top: 1px solid var(--line);
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
 }
 
-.editor-wrap strudel-editor {
-  display: block;
-  min-height: 320px;
+.editor-wrap > strudel-editor {
+  display: none;
+}
+
+.editor-wrap > div {
+  min-height: 360px;
 }
 
 .editor-wrap .cm-editor {
-  height: 100%;
   font-size: 13px;
+}
+
+.editor-wrap .cm-content {
+  padding-bottom: 20px;
 }
 
 pre.code {

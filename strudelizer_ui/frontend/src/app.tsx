@@ -1,9 +1,10 @@
+import { CodePanel } from './components/CodePanel';
 import { InputPanel } from './components/InputPanel';
 import { useStrudelizer } from './state';
 
 export function App() {
   const store = useStrudelizer();
-  const { catalog, song, code, error, busy } = store;
+  const { catalog, song } = store;
 
   return (
     <div class="app">
@@ -20,20 +21,7 @@ export function App() {
         </div>
 
         <div class="column">
-          <section class="panel" aria-labelledby="code-heading">
-            <header>
-              <h2 id="code-heading">Strudel code</h2>
-              <div class="spacer" />
-              {busy === 'convert' && <span class="spinner" role="status" aria-label="Converting" />}
-            </header>
-            {error ? (
-              <pre class="code" style="color:var(--error)">{error.text}</pre>
-            ) : code ? (
-              <pre class="code">{code}</pre>
-            ) : (
-              <p class="empty-state">Drop in a song to see its Strudel code.</p>
-            )}
-          </section>
+          <CodePanel store={store} reveal={null} />
         </div>
       </div>
     </div>
