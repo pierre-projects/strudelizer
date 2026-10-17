@@ -8,11 +8,12 @@ frontend. A plugin that fails to load is reported rather than hidden, the way
 
 from __future__ import annotations
 
+from inspect import signature
 from typing import Any
 
 from strudelizer import __version__, registry
 from strudelizer.core.errors import StrudelizerError
-from strudelizer.pipeline import DEFAULT_PASSES, parse_pass_spec
+from strudelizer.pipeline import DEFAULT_PASSES, Pipeline, parse_pass_spec
 
 from .options import describe, plugin_label
 
@@ -93,6 +94,7 @@ def catalog() -> dict[str, Any]:
         "profiles": [_common(i, p, b) for i, p, b in _plugins("profile")],
         "styles": [_common(i, p, b) for i, p, b in _plugins("style")],
         "default_passes": default_passes(),
+        "default_emitter": default_emitter(),
         "accept": accept,
         "uninstalled": uninstalled(),
     }
@@ -126,6 +128,13 @@ def uninstalled() -> list[dict[str, Any]]:
                 }
             )
     return out
+
+
+def default_emitter() -> str:
+    """The emitter `Pipeline` uses unless told otherwise, so the Save panel
+    offers the code first."""
+    default = signature(Pipeline).parameters["emitter"].default
+    return default if isinstance(default, str) else "strudel"
 
 
 def default_passes() -> list[dict[str, Any]]:

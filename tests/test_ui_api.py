@@ -97,6 +97,8 @@ def test_plugins_reports_file_types_and_emitter_formats(plugins):
     assert {".mid", ".midi"} <= set(plugins["accept"])
     formats = {e["name"]: e["format"] for e in plugins["emitters"]}
     assert formats["strudel"] == "js" and formats["midi"] == "mid"
+    # The Save panel offers this one first, and edited code goes to it.
+    assert plugins["default_emitter"] == "strudel"
 
 
 # ---- /api/import ------------------------------------------------------------
@@ -312,6 +314,11 @@ def test_export_names_the_file_after_the_song(client):
     assert response.headers["content-disposition"] == 'attachment; filename="repeats.js"'
     response = client.post("/api/export", json={"ir": ir, "format": "js", "filename": "my mix.js"})
     assert response.headers["content-disposition"] == 'attachment; filename="my_mix.js"'
+    # The UI sends the name of the file it read, so the suffix is replaced.
+    response = client.post("/api/export", json={"ir": ir, "format": "mid", "filename": "Song.mid"})
+    assert response.headers["content-disposition"] == 'attachment; filename="song.mid"'
+    response = client.post("/api/export", json={"ir": ir, "format": "ir.json", "filename": "song.ir.json"})
+    assert response.headers["content-disposition"] == 'attachment; filename="song.ir.json"'
 
 
 def test_export_of_an_unknown_format_lists_the_known_ones(client):

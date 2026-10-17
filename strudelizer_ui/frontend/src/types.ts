@@ -127,6 +127,8 @@ export interface Catalog {
   profiles: PluginInfo[];
   styles: PluginInfo[];
   default_passes: { name: string; options: Record<string, unknown> }[];
+  /** The emitter the pipeline uses unless told otherwise, usually `strudel`. */
+  default_emitter: string;
   accept: string[];
   uninstalled: UninstalledInfo[];
 }

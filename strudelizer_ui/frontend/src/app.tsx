@@ -1,4 +1,5 @@
 import { CodePanel } from './components/CodePanel';
+import { ExportPanel } from './components/ExportPanel';
 import { InputPanel } from './components/InputPanel';
 import { OptionsPanel } from './components/OptionsPanel';
 import { ProblemsPanel } from './components/ProblemsPanel';
@@ -28,6 +29,7 @@ export function App() {
           <CodePanel store={store} />
           <SongView store={store} />
           <ProblemsPanel store={store} />
+          <ExportPanel store={store} />
         </div>
       </div>
     </div>

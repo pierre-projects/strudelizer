@@ -23,7 +23,7 @@ from strudelizer.core.errors import StrudelizerError
 from strudelizer.core.ir import Song
 from strudelizer.pipeline import Pipeline
 
-from .plugins import catalog, instance
+from .plugins import catalog, default_emitter, instance
 from .report import collect_warnings
 from .schemas import ConvertRequest, ExportRequest
 
@@ -101,7 +101,7 @@ async def post_export(request: ExportRequest) -> Response:
     emitter = _emitter_for_format(request.format)
     with collect_warnings() as warnings_out:
         song = _only_tracks(Song.from_dict(request.ir, stage="import:ir"), request.tracks)
-        if request.code is not None and emitter.name == "strudel":
+        if request.code is not None and emitter.name == default_emitter():
             data: str | bytes = request.code  # the user's edits win over regenerating
         else:
             data = Pipeline(
@@ -200,9 +200,12 @@ def _emitter_for_format(fmt: str):
 
 
 def _download_name(filename: str | None, song: Song, emitter: Any) -> str:
+    """`<name>.js` and friends, whatever the name came in as: the UI passes the
+    name of the file that was read, which carries the wrong extension."""
     if filename:
-        return _safe_name(filename)
-    stem = song.meta.title or (Path(song.meta.source).stem if song.meta.source else None) or "song"
+        stem = Path(_safe_name(filename)).stem.removesuffix(".ir")
+    else:
+        stem = song.meta.title or (Path(song.meta.source).stem if song.meta.source else None) or "song"
     stem = _UNSAFE.sub("_", stem).strip("._").lower() or "song"
     # `strudelize import` writes song.ir.json, so IR downloads match.
     suffix = ".ir.json" if getattr(emitter, "writes_ir", False) else emitter.extension
