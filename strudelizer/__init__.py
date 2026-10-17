@@ -1,6 +1,6 @@
 """Strudelizer: convert music files into Strudel live-coding patterns."""
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"  # P1-P3; the package version is read from here
 
 from .core import Song, StrudelizerError, StrudelizerWarning  # noqa: E402
 

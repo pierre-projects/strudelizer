@@ -625,3 +625,69 @@ worth a second look.
     of (pitch, start, duration) must match. All six notation fixtures give 100%.
     Tests for the extras skip cleanly without them; `scripts/check.py` insists on
     them.
+
+# P4 decisions so far (packaging, plugin gate, CI)
+
+71. **Licence: MIT** (your choice). `LICENSE` names "pierre-codes" (the git author
+    name) as the copyright holder. `pyproject.toml` uses PEP 639 fields
+    (`license = "MIT"`, `license-files`), which need setuptools >= 77; the wheel
+    carries `License-Expression: MIT` and `licenses/LICENSE`. There is no licence
+    classifier, because PEP 639 forbids using both. **review**: put your real name
+    in `LICENSE` if you prefer.
+72. **Metadata.**
+    - Classifiers: Alpha, console, Python 3.10-3.13, the audio and MIDI topics.
+      Keywords are set.
+    - `authors` gives the name only, no email, because PyPI metadata is public.
+    - No `[project.urls]` yet, since the repo has no remote.
+73. **Version 0.3.0** (P1-P3 shipped), set in one place: `strudelizer.__version__`,
+    which `pyproject.toml` reads (`dynamic = ["version"]`).
+    - FR-30 puts the version in every generated header, so the bump changed all 29
+      golden `.js` files in that one line and nothing else.
+    - The emitter test now reads the version instead of hard-coding it.
+74. **The README's plugin example was broken by P3 and is fixed.** It claimed
+    `.tab`, which the built-in `ascii_tab` importer now reads; importers are tried
+    in name order, so the plugin never ran. It is now a `.frets` importer. The
+    README now explains that a plugin sharing an extension with a built-in needs
+    `--importer` or a content-sniffing `can_handle()`. **review** for P4: a
+    plugin-priority rule may be worth adding.
+75. **Plugin gate test** (`tests/test_plugin_gate.py`).
+    - It reads the plugin code and entry point straight out of README.md, so the
+      docs cannot drift.
+    - It writes a real wheel (with RECORD hashes), creates a venv with
+      `--system-site-packages` (so the venv sees the installed Strudelizer), and
+      `pip install --no-index --no-deps`es the wheel. No network is used, and
+      nothing is installed into your environment.
+    - It then runs `strudelize list` and a conversion inside the venv, and
+      evaluates the output in Strudel.
+    - A second entry point behind a missing extra must show the
+      `pip install "my-frets[pro]"` hint.
+    - It takes about 40 s, mostly venv creation.
+76. **`scripts/check.py` gained two checks.**
+    - `package` builds the sdist and wheel (`python -m build`, now in `dev`) and
+      checks the wheel's contents and METADATA.
+    - The lint step parses every file with the Python 3.10 grammar
+      (`ast.parse(feature_version=(3, 10))`), because only 3.13 is installed
+      here.
+    - The full run is lint → tests → Strudel → package.
+77. **CI** (`.github/workflows/ci.yml`):
+    - It runs `python scripts/check.py` on ubuntu, macos and windows × Python 3.10
+      and 3.13, with fail-fast off, pip and npm caches, Node 22, and every extra
+      installed.
+    - Line endings on the Windows runner are safe because `.gitattributes`
+      forces LF.
+    - **Not run yet:** the repo has no remote. Python 3.10 itself has never run
+      this code; only its grammar has been checked.
+78. **The UI wheel bundles AGPL code (review before any release).**
+    `strudelizer_ui/static/strudel/` (a patched `@strudel/repl` 1.2.6, which is
+    AGPL-3.0-or-later) is included through
+    `package-data "strudelizer_ui" = ["static/**/*"]`, so a wheel would distribute
+    it next to MIT code. Options:
+    - (a) ship the UI as a separate distribution under the AGPL, with its source
+      and the patch;
+    - (b) load Strudel from a CDN at runtime instead of vendoring it, so nothing
+      is redistributed (the UI then needs a network connection);
+    - (c) keep it in this wheel, with a third-party notice, the AGPL text and the
+      source offer for that file. Whether the UI's own frontend then becomes AGPL
+      is a legal question.
+
+    This belongs to the UI work, so I have not changed it.

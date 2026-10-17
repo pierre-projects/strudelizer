@@ -1,13 +1,33 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]  # SPDX `license` and `license-files` (PEP 639)
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "strudelizer"
-version = "0.1.0"
-description = "Convert music files into Strudel (strudel.cc) live-coding patterns"
+dynamic = ["version"]  # from strudelizer.__version__, the one place it is set
+description = "Convert MIDI, chord sheets, tabs, Guitar Pro and MusicXML into Strudel (strudel.cc) live-coding patterns"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "pierre-codes" }]
+keywords = ["strudel", "live coding", "midi", "chord sheet", "chordpro", "guitar tab", "guitar pro", "musicxml", "tidal"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Artistic Software",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Multimedia :: Sound/Audio :: MIDI",
+]
 dependencies = [
     "mido>=1.3",
     "PyYAML>=6.0",
@@ -18,7 +38,7 @@ dependencies = [
 guitarpro = ["PyGuitarPro>=0.9"]
 musicxml = ["music21>=9"]
 ui = ["fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9"]
-dev = ["pytest>=7", "pyflakes>=3", "httpx>=0.27"]
+dev = ["pytest>=7", "pyflakes>=3", "httpx>=0.27", "build>=1.2"]
 all = ["strudelizer[guitarpro,musicxml,ui,dev]"]
 
 [project.scripts]
@@ -53,6 +73,9 @@ techno = "strudelizer.profiles:techno"
 lofi = "strudelizer.styles:lofi"
 rock = "strudelizer.styles:rock"
 four_on_floor = "strudelizer.styles:four_on_floor"
+
+[tool.setuptools.dynamic]
+version = { attr = "strudelizer.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["strudelizer*", "strudelizer_ui*"]

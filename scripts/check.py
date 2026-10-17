@@ -4,6 +4,7 @@
     python scripts/check.py lint
     python scripts/check.py test [pytest args...]
     python scripts/check.py strudel    # evaluate every golden .js in Strudel
+    python scripts/check.py package    # build sdist + wheel and check what is inside
     python scripts/check.py --allow-missing-extras
 
 The full run insists on the optional extras (PyGuitarPro, music21) so their
@@ -29,8 +30,76 @@ def run(cmd: list[str], **kwargs) -> int:
     return subprocess.call(cmd, cwd=kwargs.pop("cwd", ROOT), **kwargs)
 
 
+LINT_PATHS = ["strudelizer", "strudelizer_ui", "tests", "scripts"]
+OLDEST_PYTHON = (3, 10)  # requires-python in pyproject.toml
+
+
 def lint() -> int:
-    return run([sys.executable, "-m", "pyflakes", "strudelizer", "tests", "scripts"])
+    paths = [p for p in LINT_PATHS if (ROOT / p).exists()]
+    code = run([sys.executable, "-m", "pyflakes", *paths])
+    return code or grammar()
+
+
+def grammar() -> int:
+    """Parse every file with the oldest supported Python's grammar, so syntax
+    newer than 3.10 is caught here and not first in CI."""
+    import ast
+
+    bad = []
+    for top in LINT_PATHS:
+        for path in sorted((ROOT / top).rglob("*.py")) if (ROOT / top).exists() else []:
+            if "node_modules" in path.parts:
+                continue
+            try:
+                ast.parse(path.read_text(encoding="utf-8"), str(path), feature_version=OLDEST_PYTHON)
+            except SyntaxError as exc:
+                bad.append(f"{path.relative_to(ROOT)}:{exc.lineno}: {exc.msg}")
+    for line in bad:
+        print(f"not Python {OLDEST_PYTHON[0]}.{OLDEST_PYTHON[1]} syntax: {line}", file=sys.stderr)
+    print(f"grammar: {'ok' if not bad else f'{len(bad)} problem(s)'} for Python {OLDEST_PYTHON[0]}.{OLDEST_PYTHON[1]}")
+    return 1 if bad else 0
+
+
+def package() -> int:
+    """Build the sdist and wheel and check the wheel holds what a user needs."""
+    import tempfile
+    import zipfile
+
+    sys.path.insert(0, str(ROOT))
+    from strudelizer import __version__
+
+    with tempfile.TemporaryDirectory() as out:
+        code = run([sys.executable, "-m", "build", "--outdir", out, str(ROOT)])
+        if code:
+            return code
+        wheels = list(Path(out).glob("*.whl"))
+        sdists = list(Path(out).glob("*.tar.gz"))
+        if len(wheels) != 1 or len(sdists) != 1:
+            print(f"package: expected one wheel and one sdist, got {wheels + sdists}", file=sys.stderr)
+            return 1
+        with zipfile.ZipFile(wheels[0]) as wheel:
+            names = set(wheel.namelist())
+            dist = f"strudelizer-{__version__}.dist-info"
+            metadata = wheel.read(f"{dist}/METADATA").decode("utf-8") if f"{dist}/METADATA" in names else ""
+        required = [
+            f"{dist}/licenses/LICENSE",
+            f"{dist}/entry_points.txt",
+            "strudelizer/core/schema.json",
+            "strudelizer/profiles/default.yaml",
+            "strudelizer/styles/lofi.yaml",
+        ]
+        if (ROOT / "strudelizer_ui" / "static" / "index.html").exists():
+            required.append("strudelizer_ui/static/index.html")
+        problems = [f"missing {name}" for name in required if name not in names]
+        problems += [f"tests are in the wheel: {n}" for n in sorted(names) if n.startswith("tests/")][:1]
+        for field in (f"Version: {__version__}", "License-Expression: MIT", "Requires-Python: >=3.10"):
+            if field not in metadata:
+                problems.append(f"METADATA lacks {field!r}")
+        for line in problems:
+            print(f"package: {line}", file=sys.stderr)
+        print(f"package: {wheels[0].name} ({len(names)} files), {sdists[0].name}: "
+              f"{'ok' if not problems else 'FAILED'}")
+        return 1 if problems else 0
 
 
 def test(args: list[str]) -> int:
@@ -91,12 +160,14 @@ def main(argv: list[str]) -> int:
         return test(argv[1:])
     if task == "strudel":
         return strudel()
+    if task == "package":
+        return package()
     if task != "all":
         print(__doc__, file=sys.stderr)
         return 2
     if not extras_ok(allow_missing):
         return 1
-    for name, step in (("lint", lint), ("test", lambda: test(["-q"])), ("strudel", strudel)):
+    for name, step in (("lint", lint), ("test", lambda: test(["-q"])), ("strudel", strudel), ("package", package)):
         code = step()
         if code:
             print(f"check: {name} failed", file=sys.stderr)
