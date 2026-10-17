@@ -1,15 +1,30 @@
 // Step 1 of the page: a file, or a chord sheet pasted straight in. The accepted
 // file types and the importer list both come from /api/plugins, so installing an
 // importer is all it takes for its files to be accepted here.
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Store } from '../state';
 
 export function InputPanel({ store }: { store: Store }) {
-  const { catalog, source, setSource, importer, setImporter, busy } = store;
+  const { catalog, source, setSource, importer, setImporter, busy, revealedSource } = store;
   const [over, setOver] = useState(false);
   const [text, setText] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
+  const pasted = useRef<HTMLTextAreaElement>(null);
   const accept = catalog?.accept.join(',') ?? '';
+
+  // A problem the user clicked names a line of the pasted text: select it.
+  useEffect(() => {
+    const box = pasted.current;
+    if (!box || !revealedSource) return;
+    const lines = box.value.split('\n');
+    if (revealedSource.line > lines.length) return;
+    const before = lines.slice(0, revealedSource.line - 1).join('\n');
+    const start = before.length + (before ? 1 : 0);
+    box.focus();
+    box.setSelectionRange(start, start + lines[revealedSource.line - 1].length);
+    // Scrolling by selection is unreliable, so put the line near the top.
+    box.scrollTop = Math.max(0, (revealedSource.line - 2) * lineHeight(box));
+  }, [revealedSource]);
 
   function take(file: File | undefined | null) {
     if (file) setSource({ kind: 'file', name: file.name, file });
@@ -74,6 +89,7 @@ export function InputPanel({ store }: { store: Store }) {
         </label>
         <textarea
           id="paste"
+          ref={pasted}
           rows={5}
           spellcheck={false}
           placeholder={'[Verse]\nAm      F\nC       G'}
@@ -113,4 +129,9 @@ export function InputPanel({ store }: { store: Store }) {
 
 function describe(accept: string): string {
   return accept ? accept.split(',').join(' ') : 'no importers installed';
+}
+
+function lineHeight(box: HTMLTextAreaElement): number {
+  const styled = parseFloat(getComputedStyle(box).lineHeight);
+  return Number.isNaN(styled) ? 18 : styled;
 }

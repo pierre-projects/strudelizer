@@ -517,48 +517,37 @@ pre.code {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.problem {
-  display: flex;
   gap: 10px;
-  align-items: flex-start;
-  border-left: 3px solid var(--warn);
-  padding: 4px 0 4px 10px;
 }
 
-.problem.error {
+.problems li {
+  border-left: 3px solid var(--warn);
+  padding: 2px 0 2px 10px;
+}
+
+.problems li.error {
   border-left-color: var(--error);
 }
 
-.problem .what {
-  flex: 1;
-  min-width: 0;
+.problems p {
+  margin: 2px 0 0;
 }
 
-.problem .stage {
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+.problems .tag {
   font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warn);
+}
+
+.problems li.error .tag {
+  color: var(--error);
+}
+
+.problems .fix {
   color: var(--muted);
 }
 
-.problem .fix {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.source-line {
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 6px 8px;
-  margin-top: 4px;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
 
 /* ---- misc ----------------------------------------------------------------------- */
 

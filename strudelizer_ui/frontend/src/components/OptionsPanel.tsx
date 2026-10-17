@@ -16,7 +16,6 @@ export function OptionsPanel({ store }: { store: Store }) {
     movePass,
     profile,
     setProfile,
-    song,
   } = store;
   if (!catalog) return null;
 
@@ -31,8 +30,6 @@ export function OptionsPanel({ store }: { store: Store }) {
         <h2 id="options-heading">Options</h2>
       </header>
       <div class="body">
-        {!song && <p class="small muted">Options appear once a song is loaded.</p>}
-
         {profileSpec && (
           <OptionControl
             id="opt-profile"

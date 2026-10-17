@@ -35,6 +35,8 @@ export function useStrudelizer() {
   // A line the song view or the problems panel asked the editor to show. The
   // counter makes asking twice for the same line count twice.
   const [revealed, setRevealed] = useState<{ line: number; nth: number } | null>(null);
+  // The same, for a line of the pasted source a warning complains about.
+  const [revealedSource, setRevealedSource] = useState<{ line: number; nth: number } | null>(null);
   const reveals = useRef(0);
 
   // The pass list is rebuilt for a new song only while the user has left it alone.
@@ -240,6 +242,8 @@ export function useStrudelizer() {
     reconvert,
     revealed,
     reveal: useCallback((line: number) => setRevealed({ line, nth: ++reveals.current }), []),
+    revealedSource,
+    revealSource: useCallback((line: number) => setRevealedSource({ line, nth: ++reveals.current }), []),
   };
 }
 
