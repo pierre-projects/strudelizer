@@ -6,8 +6,8 @@ import { createEditor, pushCode, revealLine, shareUrl } from '../strudel';
 import type { StrudelEditorElement, StrudelState } from '../strudel';
 import type { Store } from '../state';
 
-export function CodePanel({ store, reveal }: { store: Store; reveal: number | null }) {
-  const { code, effectiveCode, dirty, setEditedCode, busy, error } = store;
+export function CodePanel({ store }: { store: Store }) {
+  const { code, effectiveCode, dirty, setEditedCode, busy, error, revealed } = store;
   const host = useRef<HTMLDivElement>(null);
   const element = useRef<StrudelEditorElement | null>(null);
   const [ready, setReady] = useState(false);
@@ -71,8 +71,8 @@ export function CodePanel({ store, reveal }: { store: Store; reveal: number | nu
 
   useEffect(() => {
     const editor = element.current?.editor;
-    if (editor && reveal !== null) revealLine(editor, reveal);
-  }, [reveal]);
+    if (editor && revealed) revealLine(editor, revealed.line);
+  }, [revealed]);
 
   function play() {
     const editor = element.current?.editor;

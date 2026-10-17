@@ -343,23 +343,20 @@ textarea {
   overflow-x: auto;
 }
 
-.ruler {
-  display: flex;
+/* Sections, bar numbers and chords share one grid, so they line up by bar. */
+.chart {
+  min-width: min-content;
+}
+
+.lane {
+  display: grid;
+  grid-template-columns: repeat(var(--bars), var(--bar));
+  align-items: center;
+}
+
+.lane.sections {
   gap: 2px;
   margin-bottom: 4px;
-}
-
-.ruler .bar {
-  flex: 0 0 var(--bar-width, 28px);
-  text-align: center;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.sections {
-  display: flex;
-  gap: 2px;
-  margin-bottom: 6px;
 }
 
 .section {
@@ -367,106 +364,101 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 1px 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: left;
-  cursor: pointer;
 }
 
-.section.pickup {
+.lane.ruler .bar {
   background: none;
-  border-style: dashed;
-  color: var(--muted);
-}
-
-.chords-row {
-  display: flex;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.chords-row .bar {
-  flex: 0 0 var(--bar-width, 28px);
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  padding: 2px 0;
   font-size: 11px;
+  color: var(--muted);
   text-align: center;
-  color: var(--chords);
+}
+
+.lane.ruler .bar:hover {
+  color: var(--text);
+  background: var(--raised);
+}
+
+.lane.chords .bar {
+  font-size: 12px;
+  color: var(--accent);
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
+  padding: 1px 0 4px;
 }
 
-.track {
-  margin-bottom: 10px;
+.tracks {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.tracks li {
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.tracks li.off {
+  opacity: 0.45;
 }
 
 .track-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 3px;
-}
-
-.role-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex: none;
+  justify-content: space-between;
+  position: sticky;
+  left: 0;
+  /* The lanes scroll sideways; the names stay where they can be read. */
+  width: min-content;
+  min-width: 100%;
 }
 
 .track-name {
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
-.track-role {
-  font-size: 12px;
-  color: var(--muted);
+button.tiny {
+  padding: 1px 7px;
+  font-size: 11px;
 }
 
-.track-head .spacer {
-  flex: 1;
-}
-
-.track-head button {
-  padding: 1px 8px;
-  font-size: 12px;
-}
-
-.grid {
-  display: flex;
-  gap: 2px;
-}
-
-.grid .bar {
-  flex: 0 0 var(--bar-width, 28px);
-  height: var(--bar-height, 44px);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  position: relative;
-  padding: 0;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.grid .bar.empty {
-  opacity: 0.45;
-}
-
-.grid .bar.active {
+button.tiny[aria-pressed='true'] {
   border-color: var(--accent);
+  color: var(--accent);
 }
 
-.grid .bar .ev {
-  position: absolute;
-  border-radius: 1px;
-  background: currentColor;
+.lane-wrap {
+  cursor: pointer;
 }
 
-.muted-track {
-  opacity: 0.4;
+.lane-art {
+  display: block;
 }
+
+.lane-art .barline {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.lane-art .note {
+  fill: var(--accent);
+}
+
+.lane-art .hit {
+  fill: var(--text);
+}
+
 
 /* ---- code and playback -------------------------------------------------------- */
 

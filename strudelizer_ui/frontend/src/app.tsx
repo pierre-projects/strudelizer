@@ -1,6 +1,7 @@
 import { CodePanel } from './components/CodePanel';
 import { InputPanel } from './components/InputPanel';
 import { OptionsPanel } from './components/OptionsPanel';
+import { SongView } from './components/SongView';
 import { useStrudelizer } from './state';
 
 export function App() {
@@ -23,7 +24,8 @@ export function App() {
         </div>
 
         <div class="column">
-          <CodePanel store={store} reveal={null} />
+          <CodePanel store={store} />
+          <SongView store={store} />
         </div>
       </div>
     </div>

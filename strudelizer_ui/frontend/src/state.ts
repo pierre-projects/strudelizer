@@ -32,6 +32,10 @@ export function useStrudelizer() {
   const [convertWarnings, setConvertWarnings] = useState<Problem[]>([]);
   const [error, setError] = useState<Problem | null>(null);
   const [busy, setBusy] = useState<'import' | 'convert' | null>(null);
+  // A line the song view or the problems panel asked the editor to show. The
+  // counter makes asking twice for the same line count twice.
+  const [revealed, setRevealed] = useState<{ line: number; nth: number } | null>(null);
+  const reveals = useRef(0);
 
   // The pass list is rebuilt for a new song only while the user has left it alone.
   const passesTouched = useRef(false);
@@ -144,7 +148,12 @@ export function useStrudelizer() {
 
   // ---- convert ---------------------------------------------------------------
 
-  const trackIds = useMemo(() => (song?.tracks ?? []).map((track, i) => track.id ?? `track_${i}`), [song]);
+  // Mute and solo name the tracks the emitter sees, which is the song after the
+  // passes have run: `arrange` adds drums and bass that the import never had.
+  const trackIds = useMemo(
+    () => ((processed ?? song)?.tracks ?? []).map((track, i) => track.id ?? `track_${i}`),
+    [processed, song],
+  );
   const playing = useMemo(
     () => (soloed.length ? trackIds.filter((id) => soloed.includes(id)) : trackIds.filter((id) => !muted.includes(id))),
     [trackIds, muted, soloed],
@@ -229,6 +238,8 @@ export function useStrudelizer() {
     error,
     busy,
     reconvert,
+    revealed,
+    reveal: useCallback((line: number) => setRevealed({ line, nth: ++reveals.current }), []),
   };
 }
 
