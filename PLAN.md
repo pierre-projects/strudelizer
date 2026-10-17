@@ -1,3 +1,26 @@
+# Strudelizer P3 plan (tabs and notation)
+
+Housekeeping first: git (`.gitattributes` keeps goldens LF), dev tools in the
+`dev` extra, `scripts/check.py` (lint + strict tests + Strudel check, without
+make), and `{x_pickup}` as the canonical ChordPro directive.
+
+| Module | PRD | Notes |
+| --- | --- | --- |
+| `core/tab.py` | FR-13 | Staff blocks, tuning from labels / names, capo, even8/even16/columns rhythm |
+| `importers/ascii_tab.py` | FR-13 | `.tab` and tab-dominated `.txt`; header lines; unparsed-line report |
+| `importers/chordsheet.py` | FR-13 hook | Imports `{start_of_tab}` and bare tab blocks; `{capo}` |
+| `importers/guitarpro.py` | FR-12 | `[guitarpro]` extra; unfold repeats/endings; ties, dead and grace notes |
+| `importers/musicxml.py` | FR-14 | `[musicxml]` extra; expandRepeats, stripTies, harmony symbols, pickup |
+| `registry.py` | NFR-4 | Plugins behind an extra are registered only when it is installed |
+| `core/gm.py` | | GM tables and role heuristic shared by importers |
+| `emitters/strudel.py` | (investigate) | Hold tied notes: `[...]@k` multi-cycle steps |
+
+Tests: fixtures in code (`make_gp_fixtures.py`, `make_mxl.py`) or by hand; goldens;
+Strudel validity on every output; tab/GP/MusicXML → IR → MIDI → IR with every
+pitch matching.
+
+---
+
 # Strudelizer P2 plan (chord sheets)
 
 P1 follow-ups first: validate at process boundaries only (`--strict` for every

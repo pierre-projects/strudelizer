@@ -1,30 +1,39 @@
 # Strudelizer
 
-Strudelizer turns MIDI files and chord sheets into [Strudel](https://strudel.cc)
-live-coding patterns that play on strudel.cc with no edits. It works like a compiler:
+Strudelizer turns MIDI files, chord sheets, guitar tabs, Guitar Pro files and
+MusicXML scores into [Strudel](https://strudel.cc) live-coding patterns that play on
+strudel.cc with no edits. It works like a compiler:
 
 ```
 importers            Song IR (JSON)       passes                  emitters
   midi        ──▶    versioned,     ──▶   quantize, dedupe_bars   ──▶  strudel (.js)
   chordsheet         schema-checked       arrange, detect_sections     midi (.mid)
-                                          transpose, remap_drums       ir_json (.json)
+  ascii_tab                               transpose, remap_drums       ir_json (.json)
+  guitarpro   [extra]
+  musicxml    [extra]
 ```
 
 Every stage reads and writes the same Song IR, so each one can be run on its own,
 inspected, or replaced by a plugin.
 
-This covers releases P1 (MIDI) and P2 (chord sheets with generated grooves). Tabs,
-MusicXML and audio come later; see `Strudelizer-PRD.md`.
+This covers releases P1 (MIDI), P2 (chord sheets with generated grooves) and P3 (tabs
+and notation). Audio comes later; see `Strudelizer-PRD.md`.
 
 ## Install
 
-Strudelizer needs Python 3.10 or newer. Its only dependencies are mido, PyYAML and
-jsonschema.
+Strudelizer needs Python 3.10 or newer. The core depends only on mido, PyYAML and
+jsonschema. Two importers need an optional extra:
 
 ```sh
 git clone <this repo> strudelizer && cd strudelizer
-pip install -e .            # add [dev] for pytest
+pip install -e .                    # MIDI, chord sheets, ASCII tabs
+pip install -e ".[guitarpro]"       # + Guitar Pro .gp3/.gp4/.gp5 (PyGuitarPro)
+pip install -e ".[musicxml]"        # + MusicXML .musicxml/.mxl (music21)
+pip install -e ".[all]"             # everything, plus the dev tools
 ```
+
+Without an extra, its importer is not registered, and `strudelize list` shows the
+command that installs it.
 
 ## Quick start
 
@@ -35,10 +44,14 @@ These steps take about 2 minutes.
    ```sh
    strudelize song.mid -o song.js
    strudelize chords.txt --bpm 90 --style lofi -o song.js   # chords + bass + drums
+   strudelize riff.txt -o riff.js                           # an ASCII tab
+   strudelize song.gp5 -o song.js                           # Guitar Pro
+   strudelize score.musicxml -o score.js                    # MusicXML (or .mxl)
    ```
 
-   No file to hand? Use the test fixtures, such as `tests/fixtures/multitrack_repeats.mid`
-   or `tests/fixtures/sheets/night_train.txt`.
+   No file to hand? Use the test fixtures, such as `tests/fixtures/multitrack_repeats.mid`,
+   `tests/fixtures/sheets/night_train.txt`, `tests/fixtures/tabs/riff.txt`,
+   `tests/fixtures/gp/song.gp5` or `tests/fixtures/musicxml/score.musicxml`.
 
 2. Open https://strudel.cc, replace the example code with the contents of `song.js`,
    and press **ctrl+enter** (**cmd+enter** on a Mac).
@@ -95,6 +108,9 @@ Options for the one-shot form (`import` takes the importer ones too):
 | `--bpm N` | Tempo for inputs without one (chord sheets default to 100, with a warning) |
 | `--beats-per-chord N` | Chord sheets: how long each chord lasts (default one bar) |
 | `--pickup N` | Beats in a partial first bar. Overrides what the importer detects. |
+| `--tuning "D A D G B E"` | Tabs: open strings, lowest first (or `drop d`, `dadgad`, …). Default: the string labels, else standard. |
+| `--capo N` | Tabs and chord sheets: capo fret; everything sounds N semitones higher. |
+| `--tab-rhythm MODE` | Tabs: `even8` (default, each note column an 8th), `even16`, or `columns` (spacing inside each bar). |
 | `--strict` | Validate the IR after every pass, not only when it is read or written |
 
 - **Pass specs.** A bare argument fills a pass's main option (`quantize:16`,
@@ -166,6 +182,54 @@ Intro: | N.C. | Cm | Cmin | C- |       Bar lines: chords in a bar split it evenl
 - **Strict parsing.** A token is a chord only if it matches exactly, so lyrics are never
   read as chords. Lines that look like chords but don't parse (`Hm7`, `| Fxx7 |`, or an
   unknown `{directive}`) are reported with their line number and skipped.
+
+## Tabs, Guitar Pro and MusicXML
+
+**ASCII tabs** (`.tab`, or `.txt` files that are mostly tab) are blocks of 4 to 7 staff
+lines, highest string first:
+
+```
+Tuning: Drop D
+Tempo: 132
+
+e|----------------|
+B|----------------|
+G|----------------|
+D|0-0-3-0-5-3h5-0-|
+A|0-0-3-0-5-3-5-0-|
+D|0-0-3-0-5-3-5-0-|  x2
+```
+
+- **Tuning** comes from the string labels (drop D above), a `Tuning:` line, or
+  `--tuning`. Standard tuning is the default for 4-string bass, 5-string bass,
+  6-string guitar and 7-string guitar.
+- **Capo** comes from a `Capo: 2` line or `--capo`.
+- **Techniques** (`h p b r / \ ~`) are ignored, but their fret numbers are kept; a dead
+  note `x` keeps its rhythmic slot and is silent. A trailing `x2` repeats the block.
+- **Rhythm.** A tab has none, so `--tab-rhythm` picks one: `even8` (default) makes every
+  note column an eighth note, `even16` a sixteenth, and `columns` places notes by their
+  position inside each `|` bar.
+- **In chord sheets,** tab blocks (`{start_of_tab}` … `{end_of_tab}`, or bare blocks)
+  become a tab track and take their own bars in the song. `{capo: N}` applies to both the
+  chords and the tab.
+- **Broken lines** that look like tab but don't parse are reported with their line number.
+
+**Guitar Pro** files (`.gp3` to `.gp5`, with the `guitarpro` extra):
+
+- Every track becomes a track. Pitch is the string tuning plus the fret plus the
+  track's capo, and percussion tracks become drum hits.
+- Repeats and alternate endings are played out in order, and markers become sections.
+- Tied notes are held; dead notes and grace-note ornaments are left out. Other
+  techniques (bends, slides, vibrato, harmonics) are ignored.
+
+**MusicXML** (`.musicxml`, `.mxl` or `.xml`, with the `musicxml` extra):
+
+- Parts become tracks, and harmony symbols become chord events.
+- Repeats and endings are played out, and tied notes merge into one.
+- An implicit short first measure is a pickup.
+
+In all three formats, tempo or meter changes use the dominant value with a warning,
+as for MIDI.
 
 ## Styles
 
@@ -258,8 +322,9 @@ also checks it after every pass.
 
 ## Known limitations
 
-- **Notes held across a bar line are re-attacked** at the start of the next bar, because
-  each bar is one cycle of mini-notation. A long tied note sounds as one note per bar.
+- **Very long held notes are re-attacked.** A note tied across bar lines is held: the bars
+  it joins are written as one multi-cycle step. A run is capped at 4 bars and always
+  breaks at a section start, so a note held longer than that sounds again at the break.
 - **Tempo changes use the dominant tempo.** A MIDI file with several tempos converts
   at the one that covers the most of the song, with a warning. Meter changes work the
   same way.
@@ -317,6 +382,12 @@ After `pip install -e my_tabs`, `strudelize list` shows `mytab`, and
   | `strudelizer.passes` | `Pass` | `run(song, options) -> Song` | Pure: return a new Song with `dataclasses.replace`. Drop `track.bars` if you change events. |
   | `strudelizer.emitters` | `Emitter` | `emit(song, options)` | Returns `str`, or `bytes` with `binary = True`. Set `extension` so `-o` can pick it. |
   | `strudelizer.profiles`, `strudelizer.styles` | none | a zero-argument callable | Returns the mapping. |
+
+- **A plugin that needs an extra** declares it on its entry point,
+  `mytab = "my_tabs.importer:TabImporter [tabs]"`, and lists the modules it imports in
+  `requires = ("some_library",)`. Import those modules inside `load()`, not at the top of
+  the file. Until they are installed, the plugin is not registered, and `strudelize list`
+  shows the `pip install "my-tabs[tabs]"` command.
 
 ## Development
 
