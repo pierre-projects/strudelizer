@@ -14,7 +14,7 @@ from strudelizer import __version__, registry
 from strudelizer.core.errors import StrudelizerError
 from strudelizer.pipeline import DEFAULT_PASSES, parse_pass_spec
 
-from .options import describe
+from .options import describe, plugin_label
 
 
 def summary(obj: Any) -> str:
@@ -32,6 +32,7 @@ def _common(info: registry.PluginInfo, plugin: Any, broken: str | None) -> dict[
     options = None if broken else describe(info.kind, info.name, plugin)
     return {
         "name": info.name,
+        "label": plugin_label(info.kind, info.name, plugin),
         "summary": broken or summary(plugin),
         "distribution": info.distribution,
         "options": options,

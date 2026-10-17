@@ -193,6 +193,34 @@ OPTIONS: dict[tuple[str, str], list[dict[str, Any]]] = {
 }
 
 
+# What to call each plugin on screen. The docstring summary stays as the
+# tooltip, so "Tidy up the timing" and "quantize" are both one hover apart.
+PLUGIN_LABELS = {
+    ("importer", "midi"): "MIDI file",
+    ("importer", "chordsheet"): "Chord sheet",
+    ("importer", "ascii_tab"): "Guitar tab",
+    ("importer", "guitarpro"): "Guitar Pro",
+    ("importer", "musicxml"): "MusicXML",
+    ("pass", "arrange"): "Add drums and bass",
+    ("pass", "quantize"): "Tidy up the timing",
+    ("pass", "dedupe_bars"): "Collapse repeated bars",
+    ("pass", "detect_sections"): "Find sections",
+    ("pass", "transpose"): "Change key",
+    ("pass", "remap_drums"): "Swap drum sounds",
+    ("emitter", "strudel"): "Strudel code",
+    ("emitter", "midi"): "MIDI file",
+    ("emitter", "ir_json"): "Song data",
+}
+
+
+def plugin_label(kind: str, name: str, plugin: Any) -> str:
+    """A plugin's own `label`, else this table's, else its registered name."""
+    declared = getattr(plugin, "label", None)
+    if isinstance(declared, str) and declared.strip():
+        return declared.strip()
+    return PLUGIN_LABELS.get((kind, name), name)
+
+
 def describe(kind: str, name: str, plugin: Any) -> list[dict[str, Any]] | None:
     """This plugin's options, or None when nobody knows them.
 

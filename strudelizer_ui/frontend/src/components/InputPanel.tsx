@@ -92,8 +92,8 @@ export function InputPanel({ store }: { store: Store }) {
           >
             <option value="">Detect automatically</option>
             {catalog?.importers.map((info) => (
-              <option key={info.name} value={info.name}>
-                {info.name}
+              <option key={info.name} value={info.name} title={info.summary}>
+                {info.label}
               </option>
             ))}
           </select>

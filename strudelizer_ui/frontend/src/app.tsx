@@ -1,5 +1,6 @@
 import { CodePanel } from './components/CodePanel';
 import { InputPanel } from './components/InputPanel';
+import { OptionsPanel } from './components/OptionsPanel';
 import { useStrudelizer } from './state';
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
       <div class="layout">
         <div class="column">
           <InputPanel store={store} />
+          <OptionsPanel store={store} />
         </div>
 
         <div class="column">

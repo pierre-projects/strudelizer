@@ -85,6 +85,8 @@ export interface OptionSpec {
 
 export interface PluginInfo {
   name: string;
+  /** What to call it on screen; `name` is the technical spelling. */
+  label: string;
   summary: string;
   distribution: string;
   /** null when nobody describes this plugin's options: see `custom`. */

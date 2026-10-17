@@ -327,15 +327,14 @@ textarea {
 
 .pass-name {
   flex: 1;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
   min-width: 0;
+  margin: 0;
+  cursor: pointer;
 }
 
-.pass-name code {
-  color: var(--muted);
-  font-size: 12px;
+.passes .field,
+.passes details {
+  margin-top: 8px;
 }
 
 /* ---- song view ------------------------------------------------------------------ */

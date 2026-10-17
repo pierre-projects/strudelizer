@@ -83,6 +83,16 @@ def test_plugins_describes_options_so_the_panel_can_draw_them(plugins):
     assert dedupe["options"] == [] and dedupe["custom"] is False
 
 
+def test_plugins_labels_every_plugin_for_the_panel(plugins):
+    # Every entry carries a label, so the frontend needs no list of plugin names.
+    for kind in ("importers", "passes", "emitters", "profiles", "styles"):
+        assert all(p["label"] for p in plugins[kind]), kind
+    labels = {p["name"]: p["label"] for p in plugins["passes"]}
+    assert labels["quantize"] == "Tidy up the timing"
+    # A plugin nobody describes falls back to its registered name.
+    assert {p["label"] for p in plugins["styles"]} == {s["name"] for s in plugins["styles"]}
+
+
 def test_plugins_reports_file_types_and_emitter_formats(plugins):
     assert {".mid", ".midi"} <= set(plugins["accept"])
     formats = {e["name"]: e["format"] for e in plugins["emitters"]}
